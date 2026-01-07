@@ -1,0 +1,58 @@
+jwt:
+  secret: ${JWT_SECRET_KEY}
+
+spring:
+  profiles:
+    active: local
+  data:
+    redis:
+      host: localhost
+      port: 6379
+    mongodb:
+      host: localhost
+      port: 27016
+      database: chat
+  datasource:
+    hikari:
+      auto-commit: false
+      maximum-pool-size: 20
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/chat?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: ${DB_PASSWORD:1234}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+        default_batch_fetch_size: 10
+
+cors:
+  allowed-origins: "*"
+
+snowflake:
+  node-id: 1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # [핵심] prometheus 엔드포인트를 엽니다.
+        include: health, info, prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+
+#logging:
+#  level:
+#    # [핵심] STOMP 메시지 처리 과정과 내부 에러를 보여줍니다.
+#    org.springframework.messaging: DEBUG
+#
+#    # (선택) 웹소켓 연결(Handshake) 자체의 문제를 볼 때 필요합니다.
+#    org.springframework.web.socket: DEBUG
+#
+#    # (선택) 시큐리티 관련(JWT 등) 채널 차단 로그를 볼 때 필요합니다.
+#    org.springframework.security.messaging: DEBUG

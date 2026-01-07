@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>웹 채팅</title>
+</head>
+<body class="h-screen flex">
+<!-- 좌측 채팅창 -->
+<div class="w-2/3 h-full border-r border-gray-300 p-4">
+    <div class="h-full bg-gray-100 flex items-center justify-center">
+        <p class="text-gray-500">채팅 영역</p>
+    </div>
+</div>
+
+<!-- 우측 영역 -->
+<div class="w-1/3 h-full flex flex-col justify-between p-4">
+    <!-- 상단 로그인 영역 -->
+    <div class="flex justify-end items-center space-x-4">
+        <div id="auth-buttons">
+            <button class="px-4 py-2 bg-blue-500 text-white rounded">로그인</button>
+            <button class="px-4 py-2 bg-green-500 text-white rounded">회원가입</button>
+        </div>
+        <div id="profile" class="hidden flex items-center space-x-2">
+            <img src="https://via.placeholder.com/40" alt="Profile" class="w-10 h-10 rounded-full">
+            <span class="text-gray-700">닉네임</span>
+            <button class="px-4 py-2 bg-red-500 text-white rounded">로그아웃</button>
+        </div>
+    </div>
+
+    <!-- 하단 채팅 목록 -->
+    <div class="h-2/3 border-t border-gray-300 p-4 overflow-y-auto">
+        <p class="text-gray-500 text-center">채팅 이력이 없습니다.</p>
+    </div>
+</div>
+</body>
+</html>

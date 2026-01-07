@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Chat App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background-color: #1f2937; }
+        .hidden-mode { display: none !important; }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-gray-100">
+<div class="flex flex-col h-screen font-sans">
+
+    <header class="relative w-full bg-gray-900 h-12 flex items-center justify-between px-3 shrink-0 z-20">
+        <div class="w-20"></div>
+
+        <h1 id="main-app-title"
+            class="absolute left-1/2 transform -translate-x-1/2 text-lg font-bold text-white tracking-wide">
+            친구 <span id="header-friend-count" class="text-gray-400 text-sm ml-1 font-medium">0</span>
+        </h1>
+
+        <div class="flex items-center justify-end w-auto min-w-[5rem]">
+            <div id="header-user-profile" class="flex items-center gap-3 py-1 px-2 rounded-lg hover:bg-gray-800 transition cursor-pointer" title="내 프로필 편집">
+                <div class="text-xs text-gray-500">Loading...</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+
+        <div id="left-container" class="flex flex-col w-1/3 max-w-sm bg-gray-800 border-r border-gray-700 relative">
+
+            <div class="flex flex-1 overflow-hidden bg-gray-900">
+                <div id="sidebar-nav"
+                     class="flex-shrink-0 w-16 bg-gray-900 flex flex-col items-center py-4 gap-4 z-10">
+                    <button id="nav-friends" title="친구"
+                            class="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-700 hover:text-white transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                            <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <button id="nav-chat" title="대화"
+                            class="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-600 text-white shadow-lg shadow-blue-900/50 hover:bg-blue-500 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                            <path fill-rule="evenodd" d="M5.337 21.718a6.707 6.707 0 0 1-.533-.074.75.75 0 0 1-.44-1.223 3.73 3.73 0 0 0 .814-1.686c.023-.115-.022-.317-.254-.543C3.274 16.587 2.25 14.41 2.25 12c0-5.03 4.428-9 9.75-9s9.75 3.97 9.75 9c0 5.03-4.428 9-9.75 9-.833 0-1.643-.097-2.417-.279a6.721 6.721 0 0 1-4.246.997Z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <button id="nav-notification" title="알림"
+                            class="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-gray-700 hover:text-white transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                            <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
+                            <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
+                        </svg>
+
+                    </button>
+                </div>
+
+                <div id="sidebar-panel" class="flex-1 flex flex-col bg-gray-800 relative overflow-hidden rounded-tl-xl">
+
+                    <aside id="friends-sidebar" class="hidden-mode w-full flex-1 flex flex-col relative overflow-hidden">
+                        <div class="h-12 flex items-center px-3 border-b border-gray-700 bg-gray-800 shrink-0">
+                            <div class="relative w-full">
+                                <input type="text" id="friend-search-input" placeholder="친구 검색"
+                                       class="w-full px-4 py-1.5 pl-9 bg-gray-900 text-gray-200 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 text-sm"/>
+                                <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 24 24" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                              d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z"
+                                              clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto custom-scrollbar bg-gray-800">
+                            <ul id="friends-list" class="divide-y divide-gray-700/50">
+                                <li class="p-4 text-center text-gray-500 text-sm">로딩 중...</li>
+                            </ul>
+                        </div>
+
+                        <button id="open-add-friend-modal-btn"
+                                class="absolute bottom-6 right-6 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-500 transition hover:scale-105 z-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                                <path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </aside>
+
+                    <aside id="chat-sidebar" class="hidden-mode w-full flex-1 flex flex-col relative overflow-hidden">
+                        <div class="h-12 flex items-center px-3 border-b border-gray-700 bg-gray-800 shrink-0">
+                            <div class="relative w-full">
+                                <input type="text" id="channel-search-input" placeholder="채널 검색"
+                                       class="w-full px-4 py-1.5 pl-9 bg-gray-900 text-gray-200 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 text-sm"/>
+                                <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 24 24" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                              d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z"
+                                              clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar">
+                            <ul id="channel-list" class="px-3 pt-2 space-y-1"></ul>
+                        </div>
+                        <button id="create-channel-button"
+                                class="absolute bottom-6 right-6 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-500 transition hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                                <path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </aside>
+
+                    <aside id="notification-sidebar"
+                           class="hidden-mode w-full flex-1 flex flex-col relative overflow-hidden">
+                        <div class="h-12 flex border-b border-gray-700 shrink-0 bg-gray-800">
+                            <button id="tab-channel-invites"
+                                    class="flex-1 text-sm font-bold transition-colors border-b-2 text-white border-blue-500 hover:bg-gray-700/50">
+                                채널 초대
+                            </button>
+                            <button id="tab-friend-requests"
+                                    class="flex-1 text-sm font-bold transition-colors border-b-2 text-gray-500 border-transparent hover:text-gray-300 hover:bg-gray-700/50">
+                                친구 신청
+                            </button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar">
+                            <ul id="notification-list" class="divide-y divide-gray-700"></ul>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+
+        </div>
+
+        <main id="friends-main"
+              class="hidden-mode flex-1 flex flex-col bg-gray-700 justify-center items-center relative">
+            <div id="friends-empty-state" class="text-gray-400 text-center flex flex-col items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="w-16 h-16 mb-4 opacity-50">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>
+                </svg>
+                <p>목록에서 친구를 선택하거나<br>상단 헤더의 내 프로필을 눌러 편집하세요.</p>
+            </div>
+            <div id="friend-detail-view"
+                 class="hidden w-full max-w-md bg-gray-800 rounded-2xl shadow-2xl border border-gray-600 overflow-hidden">
+                <div class="h-32 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+                <div class="px-8 pb-8 text-center -mt-16">
+                    <div id="friend-profile-container" class="inline-block relative"></div>
+                    <h2 id="friend-detail-nickname" class="mt-4 text-3xl font-bold text-white">Nickname</h2>
+                    <p id="friend-detail-username" class="text-sm text-gray-400 mt-1">@username</p>
+                    <div class="mt-8 flex gap-4 justify-center">
+                        <button onclick="alert('1:1 채팅 기능은 준비중입니다.')"
+                                class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3 px-6 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                 stroke="currentColor" class="size-5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/>
+                            </svg>
+                            1:1 채팅
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="my-profile-edit-view"
+                 class="hidden w-full max-w-md bg-gray-800 rounded-2xl shadow-2xl border border-gray-600 overflow-hidden">
+                <div class="h-32 bg-gray-600 relative">
+                    <h3 class="absolute top-4 left-4 text-white font-bold opacity-70 bg-black/30 px-2 py-1 rounded">내
+                        프로필 편집</h3>
+                </div>
+                <div class="px-8 pb-8 text-center -mt-16">
+                    <div id="my-edit-profile-container" class="inline-block relative cursor-pointer group"></div>
+                    <div class="mt-6 text-left space-y-4">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1 ml-1">닉네임</label>
+                            <input type="text" id="edit-nickname-input"
+                                   class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1 ml-1">아이디 (@)</label>
+                            <input type="text" id="edit-username-input"
+                                   class="w-full bg-gray-900 text-gray-500 px-4 py-2 rounded-lg border border-gray-800 cursor-not-allowed"
+                                   disabled>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <button onclick="alert('저장되었습니다. (UI 데모)')"
+                                class="w-full bg-green-600 hover:bg-green-500 text-white py-3 px-6 rounded-xl font-bold transition">
+                            저장하기
+                        </button>
+                    </div>
+
+                    <div class="mt-3">
+                        <button id="logout-button"
+                                class="w-full bg-red-600/20 hover:bg-red-600/40 text-red-400 hover:text-red-100 border border-red-900/50 py-3 px-6 rounded-xl font-bold transition flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
+                                <path fill-rule="evenodd" d="M16.5 3.75a1.5 1.5 0 0 1 1.5 1.5v13.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5V15a.75.75 0 0 0-1.5 0v3.75a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V5.25a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3V9A.75.75 0 0 0 10.5 9V5.25a1.5 1.5 0 0 1 1.5-1.5h6Zm-5.03 4.72a.75.75 0 0 0 0 1.06l1.72 1.72H2.25a.75.75 0 0 0 0 1.5h10.94l-1.72 1.72a.75.75 0 1 0 1.06 1.06l3-3a.75.75 0 0 0 0-1.06l-3-3a.75.75 0 0 0-1.06 0Z" clip-rule="evenodd" />
+                            </svg>
+                            로그아웃
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <main id="chat-main" class="hidden-mode flex-1 flex flex-col bg-gray-700 relative">
+            <header class="h-12 px-4 border-b border-gray-600 flex justify-between items-center shadow-sm z-10">
+                <h2 id="main-header-title-sub" class="text-lg font-bold text-gray-100 truncate">채널을 선택하세요</h2>
+                <div class="flex items-center gap-2">
+
+                    <div class="relative" id="member-menu-wrapper">
+                        <button id="toggle-member-list-btn" title="참가자 목록"
+                                class="relative w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                                <path d="M4.5 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM14.25 8.625a3.375 3.375 0 1 1 6.75 0 3.375 3.375 0 0 1-6.75 0ZM1.5 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM17.25 19.128l-.001.144a2.25 2.25 0 0 1-.233.96 10.088 10.088 0 0 0 5.06-1.01.75.75 0 0 0 .42-.643 4.875 4.875 0 0 0-6.957-4.611 8.586 8.586 0 0 1 1.71 5.157v.003Z" />
+                            </svg>
+                            <span id="member-count-badge" class="absolute -top-1 -right-1 flex items-center justify-center min-w-[16px] h-4 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full hidden">0</span>
+                        </button>
+
+                        <div id="member-list-dropdown"
+                             class="hidden absolute top-full left-0 mt-2 w-64 bg-gray-800 border border-gray-600 rounded-xl shadow-2xl z-50 flex flex-col max-h-80 overflow-hidden">
+                            <div class="px-4 py-3 border-b border-gray-700 bg-gray-800 shrink-0 flex justify-between items-center">
+                                <h4 class="text-sm font-bold text-white">참가자 목록</h4>
+                                <button id="close-member-list-btn" class="text-gray-400 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div id="member-list-container" class="flex-1 overflow-y-auto custom-scrollbar p-1">
+                                <ul id="member-list-ul" class="space-y-1"></ul>
+                                <div id="member-loading-spinner" class="hidden p-3 text-center text-xs text-gray-500">로딩 중...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative" id="invite-menu-wrapper">
+                        <button id="toggle-invite-btn" title="참가자 추가"
+                                class="relative w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                                <path d="M5.25 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM2.25 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM18.75 7.5a.75.75 0 0 0-1.5 0v2.25H15a.75.75 0 0 0 0 1.5h2.25v2.25a.75.75 0 0 0 1.5 0v-2.25H21a.75.75 0 0 0 0-1.5h-2.25V7.5Z" />
+                            </svg>
+                        </button>
+
+                        <div id="invite-dropdown"
+                             class="hidden absolute top-full right-0 mt-2 w-80 bg-gray-800 border border-gray-600 rounded-xl shadow-2xl z-50 flex flex-col max-h-[28rem] overflow-hidden">
+
+                            <div class="px-4 py-3 border-b border-gray-700 bg-gray-800 shrink-0 flex justify-between items-center">
+                                <h4 class="text-sm font-bold text-white">채널 초대</h4>
+                                <button id="close-invite-btn" class="text-gray-400 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                                        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="flex-1 overflow-hidden flex flex-col p-3">
+                                <div class="mb-3">
+                                    <div class="flex gap-2">
+                                        <input type="text" id="invite-username-input"
+                                               class="flex-1 bg-gray-900 border border-gray-600 text-white px-3 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500 text-xs"
+                                               placeholder="@사용자명">
+                                        <button id="invite-username-btn"
+                                                class="bg-gray-700 hover:bg-gray-600 text-white px-3 rounded-lg text-xs font-bold whitespace-nowrap border border-gray-600">
+                                            초대
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="relative flex py-1 items-center">
+                                    <div class="flex-grow border-t border-gray-700"></div>
+                                    <span class="flex-shrink-0 mx-2 text-gray-500 text-[10px]">친구 목록</span>
+                                    <div class="flex-grow border-t border-gray-700"></div>
+                                </div>
+
+                                <div class="flex-1 overflow-y-auto custom-scrollbar bg-gray-900/30 rounded-lg">
+                                    <ul id="invite-friend-list" class="divide-y divide-gray-700/50">
+                                        <li class="p-4 text-center text-gray-500 text-xs">로딩 중...</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <input type="text" id="message-search-input" placeholder="메시지 검색"
+                               class="w-40 px-3 py-1 pl-8 bg-gray-900 text-gray-200 border border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500 text-sm"/>
+                        <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                 viewBox="0 0 24 24">
+                                <path fill-rule="evenodd"
+                                      d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z"
+                                      clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div id="message-list-container" class="flex-1 p-4 pb-24 overflow-y-auto custom-scrollbar bg-gray-700">
+                <div id="message-list" class="space-y-4 pb-2">
+                    <div class="p-4 text-center text-gray-400">채널을 선택하여 대화를 시작하세요.</div>
+                </div>
+            </div>
+
+            <footer class="absolute bottom-0 left-0 w-full p-6 z-20 bg-transparent pointer-events-none">
+
+                <div class="relative w-full h-14 bg-gray-800 rounded-2xl flex items-center shadow-2xl border border-gray-600 pointer-events-auto">
+
+                    <input type="text" id="message-input" placeholder="메시지를 입력하세요..."
+                           class="w-full h-full bg-transparent border-none px-5 text-gray-100 placeholder-gray-400 focus:outline-none rounded-2xl pr-14 text-base"/>
+
+                    <button id="send-button"
+                            class="absolute right-2 w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                            <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
+                        </svg>
+                    </button>
+                </div>
+            </footer>
+        </main>
+
+        <main id="notification-main" class="hidden-mode flex-1 flex flex-col bg-gray-700 justify-center items-center">
+            <div id="notification-detail-empty" class="text-gray-400 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="w-16 h-16 mx-auto mb-4 opacity-50">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
+                </svg>
+                <p>알림을 선택하면<br>상세 내용이 표시됩니다.</p>
+            </div>
+            <div id="notification-detail-content"
+                 class="hidden w-full max-w-lg bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-600">
+                <div class="flex flex-col items-center">
+                    <div id="notification-detail-profile-container" class="mb-6"></div>
+                    <h3 id="detail-title" class="text-2xl font-bold text-white mb-2">Title</h3>
+                    <p id="detail-desc" class="text-gray-300 text-center mb-8">Description</p>
+                    <div class="flex gap-4 w-full">
+                        <button id="detail-btn-reject"
+                                class="flex-1 py-3 px-6 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition font-medium">
+                            거절
+                        </button>
+                        <button id="detail-btn-accept"
+                                class="flex-1 py-3 px-6 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition font-bold shadow-lg">
+                            수락
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+</div>
+
+<div id="create-channel-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-gray-800 p-6 rounded-xl w-full max-w-md border border-gray-600 shadow-2xl">
+        <h3 class="text-xl font-bold mb-6 text-white text-center">새 채널 생성</h3>
+        <input type="text" id="channel-name-input"
+               class="w-full bg-gray-700 border border-gray-600 text-white p-3 mb-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+               placeholder="채널 이름 입력">
+        <div class="flex justify-end gap-3">
+            <button id="cancel-create-button"
+                    class="px-5 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition">취소
+            </button>
+            <button id="confirm-create-button"
+                    class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition font-bold">생성
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="channel-settings-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-gray-800 p-6 rounded-xl w-full max-w-md border border-gray-600 shadow-2xl">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-white">채널 설정</h3>
+            <button id="close-settings-button" class="text-gray-400 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                     stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="mb-6">
+            <label class="block text-xs text-gray-400 mb-1 ml-1">채널 이름</label>
+            <div class="flex gap-2">
+                <input type="text" id="setting-channel-name-input"
+                       class="flex-1 bg-gray-700 border border-gray-600 text-white p-2 rounded-lg">
+                <button id="setting-update-name-button"
+                        class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-lg text-sm font-bold">수정
+                </button>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <button id="setting-invite-button"
+                    class="bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg font-medium">초대 코드 복사
+            </button>
+            <button id="setting-delete-button"
+                    class="bg-red-900/50 text-red-400 hover:bg-red-900/80 hover:text-red-200 py-3 rounded-lg font-medium border border-red-900">
+                채널 삭제
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="add-friend-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-gray-800 p-6 rounded-xl w-full max-w-md border border-gray-600 shadow-2xl">
+        <h3 class="text-xl font-bold mb-2 text-white text-center">친구 신청</h3>
+        <p class="text-gray-400 text-sm text-center mb-6">친구의 ID (@Username)를 입력하세요.</p>
+
+        <input type="text" id="add-friend-input-modal"
+               class="w-full bg-gray-700 border border-gray-600 text-white p-3 mb-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
+               placeholder="@user1234">
+
+        <div class="flex justify-end gap-3">
+            <button id="cancel-add-friend-btn"
+                    class="px-5 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition">취소
+            </button>
+            <button id="confirm-add-friend-btn"
+                    class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition font-bold">신청 보내기
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { Client } from "https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/esm6/index.js";
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const token = localStorage.getItem("accessToken");
+        if (!token) { window.location.href = "/login"; return; }
+
+        async function safeFetch(url, options = {}) {
+            const headers = { "Content-Type": "application/json", "Authorization": `Bearer ${token}`, ...(options.headers || {}) };
+            try {
+                const response = await fetch(url, { ...options, headers });
+                if (response.status === 401 || response.status === 403) { localStorage.removeItem("accessToken"); window.location.href = "/login"; return null; }
+                return response;
+            } catch (e) { console.error("Network Error:", e); return null; }
+        }
+
+        let currentUserId = null;
+        try { currentUserId = JSON.parse(atob(token.split(".")[1])).sub.toString(); }
+        catch(e) { localStorage.removeItem("accessToken"); window.location.href="/login"; return; }
+
+        let userProfileCache = new Map();
+        let stompClient = null;
+        let currentSubscription = null;
+        let currentActiveChannelId = null;
+        let channelCursor = null, channelHasNextPage = true, isChannelLoading = false;
+        let messageCursor = null, messageHasNextPage = true, isLoadingMessages = false, lastRenderedDate = null;
+        let memberCursor = null, memberHasNextPage = true, isMemberLoading = false;
+        let currentFriendCount = 0;
+        let inviteFriendCursor = null, inviteFriendHasNextPage = true, isInviteFriendLoading = false;
+
+        // [추가] 읽음 처리 디바운싱 타이머 변수
+        let readDebounceTimer = null;
+        const READ_DEBOUNCE_DELAY = 1000; // 1초 대기
+
+        // DOM Elements
+        const mainAppTitle = document.getElementById("main-app-title");
+        const navChat = document.getElementById("nav-chat");
+        const navNotification = document.getElementById("nav-notification");
+        const navFriends = document.getElementById("nav-friends");
+
+        const chatSidebar = document.getElementById("chat-sidebar");
+        const chatMain = document.getElementById("chat-main");
+        const notiSidebar = document.getElementById("notification-sidebar");
+        const notiMain = document.getElementById("notification-main");
+        const friendsSidebar = document.getElementById("friends-sidebar");
+        const friendsMain = document.getElementById("friends-main");
+
+        const channelList = document.getElementById("channel-list");
+        const channelListContainer = channelList ? channelList.parentElement : null;
+        const messageList = document.getElementById("message-list");
+        const messageListContainer = document.getElementById("message-list-container");
+        const messageInput = document.getElementById("message-input");
+        const sendButton = document.getElementById("send-button");
+        const mainHeaderSub = document.getElementById("main-header-title-sub");
+        const memberCountBadge = document.getElementById("member-count-badge");
+
+        const toggleMemberListBtn = document.getElementById("toggle-member-list-btn");
+        const memberListDropdown = document.getElementById("member-list-dropdown");
+        const memberListContainer = document.getElementById("member-list-container");
+        const memberListUl = document.getElementById("member-list-ul");
+        const memberLoadingSpinner = document.getElementById("member-loading-spinner");
+        const closeMemberListBtn = document.getElementById("close-member-list-btn");
+
+        const friendsList = document.getElementById("friends-list");
+        const friendsEmptyState = document.getElementById("friends-empty-state");
+        const friendDetailView = document.getElementById("friend-detail-view");
+        const myProfileEditView = document.getElementById("my-profile-edit-view");
+        const friendProfileContainer = document.getElementById("friend-profile-container");
+        const friendDetailNickname = document.getElementById("friend-detail-nickname");
+        const friendDetailUsername = document.getElementById("friend-detail-username");
+        const myEditProfileContainer = document.getElementById("my-edit-profile-container");
+        const editNicknameInput = document.getElementById("edit-nickname-input");
+        const editUsernameInput = document.getElementById("edit-username-input");
+        const headerUserProfile = document.getElementById("header-user-profile");
+        const logoutButton = document.getElementById("logout-button");
+
+        const openAddFriendModalBtn = document.getElementById("open-add-friend-modal-btn");
+        const addFriendModal = document.getElementById("add-friend-modal");
+        const addFriendInputModal = document.getElementById("add-friend-input-modal");
+        const cancelAddFriendBtn = document.getElementById("cancel-add-friend-btn");
+        const confirmAddFriendBtn = document.getElementById("confirm-add-friend-btn");
+
+        const tabChannelInvites = document.getElementById("tab-channel-invites");
+        const tabFriendRequests = document.getElementById("tab-friend-requests");
+        const notificationList = document.getElementById("notification-list");
+        const notiDetailEmpty = document.getElementById("notification-detail-empty");
+        const notiDetailContent = document.getElementById("notification-detail-content");
+        const notiDetailProfileContainer = document.getElementById("notification-detail-profile-container");
+        const detailTitle = document.getElementById("detail-title");
+        const detailDesc = document.getElementById("detail-desc");
+        const detailBtnAccept = document.getElementById("detail-btn-accept");
+        const detailBtnReject = document.getElementById("detail-btn-reject");
+
+        const createChannelModal = document.getElementById("create-channel-modal");
+        const channelNameInput = document.getElementById("channel-name-input");
+        const createChannelButton = document.getElementById("create-channel-button");
+        const confirmCreateButton = document.getElementById("confirm-create-button");
+        const cancelCreateButton = document.getElementById("cancel-create-button");
+        const settingsModal = document.getElementById("channel-settings-modal");
+        const closeSettingsButton = document.getElementById("close-settings-button");
+        const settingsChannelNameInput = document.getElementById("setting-channel-name-input");
+
+        const toggleInviteBtn = document.getElementById("toggle-invite-btn");
+        const inviteDropdown = document.getElementById("invite-dropdown");
+        const closeInviteBtn = document.getElementById("close-invite-btn");
+        const inviteFriendList = document.getElementById("invite-friend-list");
+        const inviteUsernameInput = document.getElementById("invite-username-input");
+        const inviteUsernameBtn = document.getElementById("invite-username-btn");
+
+        // Helpers
+        function getYYYYMMDD(isoString) { try{const d=new Date(isoString);return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;}catch(e){return null;}}
+        function formatChannelTimestamp(isoString) { if(!isoString)return "";const now=new Date();const d=new Date(isoString);return (now.toDateString()===d.toDateString())?d.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",hour12:false}):`${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getDate().toString().padStart(2,'0')}`; }
+        function getProfileHtml(imageUrl, nickname, colorCode, sizeClass, borderClass="") {
+            if (imageUrl) {
+                return `<img class="${sizeClass} rounded-full object-cover ${borderClass} bg-gray-700" src="${imageUrl}" alt="${nickname}">`;
+            }
+            let bgStyle = "";
+            let bgClass = "bg-gray-500";
+            if (colorCode) {
+                if (colorCode.startsWith("#") || colorCode.startsWith("rgb")) {
+                    bgClass = "";
+                    bgStyle = `style="background-color: ${colorCode};"`;
+                } else {
+                    bgClass = colorCode;
+                }
+            }
+            return `<div class="${sizeClass} rounded-full flex items-center justify-center text-white shrink-0 ${borderClass} ${bgClass}" ${bgStyle}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-1/2 h-1/2">
+                    <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" />
+                </svg>
+            </div>`;
+        }
+
+        function switchMainTab(mode) {
+            [navChat, navNotification, navFriends].forEach(btn => {
+                if(!btn) return;
+                btn.classList.remove("bg-blue-600", "bg-gray-600", "text-white", "shadow-lg", "shadow-blue-900/50");
+                btn.classList.add("text-gray-400", "hover:bg-gray-700", "hover:text-white");
+            });
+            chatSidebar.classList.add("hidden-mode"); chatMain.classList.add("hidden-mode");
+            notiSidebar.classList.add("hidden-mode"); notiMain.classList.add("hidden-mode");
+            friendsSidebar.classList.add("hidden-mode"); friendsMain.classList.add("hidden-mode");
+            const activeClasses = ["bg-blue-600", "text-white", "shadow-lg", "shadow-blue-900/50"];
+            const inactiveClasses = ["text-gray-400", "hover:bg-gray-700", "hover:text-white"];
+
+            if (mode === "CHAT") {
+                mainAppTitle.innerHTML = "대화";
+                navChat.classList.add(...activeClasses); navChat.classList.remove(...inactiveClasses);
+                chatSidebar.classList.remove("hidden-mode"); chatMain.classList.remove("hidden-mode");
+            } else if (mode === "NOTIFICATION") {
+                mainAppTitle.innerHTML = "알림";
+                navNotification.classList.add(...activeClasses); navNotification.classList.remove(...inactiveClasses);
+                notiSidebar.classList.remove("hidden-mode"); notiMain.classList.remove("hidden-mode");
+                switchNotificationSubTab("CHANNEL_INVITE");
+            } else if (mode === "FRIENDS") {
+                mainAppTitle.innerHTML = `친구 <span class="text-gray-400 text-sm ml-1 font-medium">${currentFriendCount}</span>`;
+                navFriends.classList.add(...activeClasses); navFriends.classList.remove(...inactiveClasses);
+                friendsSidebar.classList.remove("hidden-mode"); friendsMain.classList.remove("hidden-mode");
+                loadFriendsTab();
+            }
+        }
+
+        async function loadGlobalProfile() {
+            const res = await safeFetch(`/api/users/@me`);
+            if(res) {
+                const u = await res.json();
+                if(u.id) userProfileCache.set(u.id.toString(), u);
+                else userProfileCache.set(currentUserId, u);
+                renderHeaderProfile(u);
+            }
+        }
+
+        function renderHeaderProfile(u) {
+            if(!headerUserProfile) return;
+            headerUserProfile.innerHTML = `
+                <div class="flex flex-col items-end mr-2 justify-center">
+                    <span class="text-sm font-bold text-gray-200 leading-tight">${u.nickname}</span>
+                </div>
+                ${getProfileHtml(u.profileImageUrl, u.nickname, u.profileIconColor, "w-8 h-8", "border border-gray-600")}
+            `;
+            headerUserProfile.onclick = () => {
+                switchMainTab("FRIENDS");
+                showEditView(u);
+            };
+        }
+
+        // [추가] 읽음 처리 요청 (즉시 전송)
+        function sendMarkAsRead(channelId, messageId) {
+            if (!stompClient || !stompClient.active || !channelId || !messageId) return;
+            // console.log(`📡 [읽음 전송] 채널: ${channelId}, 메시지ID: ${messageId}`);
+            stompClient.publish({
+                destination: `/app/channel/${channelId}/read`, // 서버 @MessageMapping 경로 확인 필요
+                headers: { Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ lastReadMessageId: messageId })
+            });
+        }
+
+        // [추가] 읽음 처리 요청 (디바운싱 적용)
+        function scheduleMarkAsRead(channelId, messageId) {
+            // 기존 타이머 취소 (이전 요청 폐기)
+            if (readDebounceTimer) {
+                clearTimeout(readDebounceTimer);
+            }
+            // 새 타이머 예약
+            readDebounceTimer = setTimeout(() => {
+                sendMarkAsRead(channelId, messageId);
+                readDebounceTimer = null;
+            }, READ_DEBOUNCE_DELAY);
+        }
+
+        // --- Friends Tab Logic ---
+        async function loadFriendsTab() {
+            const fRes = await safeFetch(`/api/users/@me/friends?size=50`);
+            if(fRes) {
+                const d = await fRes.json();
+                const list = d.users || [];
+                currentFriendCount = list.length;
+                if(!friendsSidebar.classList.contains("hidden-mode")) {
+                    mainAppTitle.innerHTML = `친구 <span class="text-gray-400 text-sm ml-1 font-medium">${currentFriendCount}</span>`;
+                }
+                friendsList.innerHTML = "";
+                if(list.length === 0) { friendsList.innerHTML = '<li class="p-4 text-center text-gray-500 text-xs">친구가 없습니다.</li>'; return; }
+                list.forEach(f => {
+                    const li = document.createElement("li");
+                    li.className = "flex items-center gap-3 p-3 hover:bg-gray-700 cursor-pointer transition border-b border-gray-700/50";
+                    li.innerHTML = `
+                        ${getProfileHtml(f.profileImageUrl, f.nickname, f.profileIconColor, "w-9 h-9", "border border-gray-600")}
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-medium text-gray-200 truncate">${f.nickname}</div>
+                        </div>`;
+                    li.onclick = () => showFriendDetail(f);
+                    friendsList.appendChild(li);
+                });
+            }
+        }
+
+        function showFriendDetail(u) {
+            friendsEmptyState.classList.add("hidden"); myProfileEditView.classList.add("hidden"); friendDetailView.classList.remove("hidden");
+            friendProfileContainer.innerHTML = getProfileHtml(u.profileImageUrl, u.nickname, u.profileIconColor, "w-32 h-32", "border-4 border-gray-800 shadow-xl");
+            friendDetailNickname.textContent = u.nickname;
+            friendDetailUsername.textContent = "@" + u.username;
+        }
+
+        function showEditView(u) {
+            friendsEmptyState.classList.add("hidden"); friendDetailView.classList.add("hidden"); myProfileEditView.classList.remove("hidden");
+            myEditProfileContainer.innerHTML = `${getProfileHtml(u.profileImageUrl, u.nickname, u.profileIconColor, "w-32 h-32", "border-4 border-gray-800 shadow-xl")}<div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-white"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" /></svg></div>`;
+            editNicknameInput.value = u.nickname;
+            editUsernameInput.value = "@" + u.username;
+        }
+
+        if(openAddFriendModalBtn) {
+            openAddFriendModalBtn.onclick = () => { addFriendModal.classList.remove("hidden"); addFriendInputModal.value = ""; addFriendInputModal.focus(); };
+        }
+        if(cancelAddFriendBtn) { cancelAddFriendBtn.onclick = () => addFriendModal.classList.add("hidden"); }
+        if(confirmAddFriendBtn) {
+            confirmAddFriendBtn.onclick = async () => {
+                let targetUsername = addFriendInputModal.value.trim();
+                if(!targetUsername) { alert("친구 ID를 입력해주세요."); return; }
+                if (targetUsername.startsWith("@")) { targetUsername = targetUsername.substring(1); }
+                const res = await safeFetch("/api/friend-requests", { method: "POST", body: JSON.stringify({ username: targetUsername }) });
+                if(res && res.ok) {
+                    alert(`'${targetUsername}'님에게 친구 신청을 보냈습니다.`);
+                    addFriendModal.classList.add("hidden"); addFriendInputModal.value = "";
+                } else { alert("친구 신청에 실패했습니다."); }
+            };
+        }
+        if(addFriendInputModal) {
+            addFriendInputModal.onkeydown = (e) => {
+                if(e.key === "Enter") confirmAddFriendBtn.click();
+                if(e.key === "Escape") cancelAddFriendBtn.click();
+            }
+        }
+
+        // --- Channel List Logic ---
+        async function loadChannels() {
+            if (isChannelLoading || !channelHasNextPage) return;
+            isChannelLoading = true;
+            let url = `/api/channels?size=15` + (channelCursor ? `&cursor=${channelCursor}` : "");
+            const res = await safeFetch(url);
+            isChannelLoading = false;
+            if(!res) return;
+
+            const dto = await res.json();
+            channelHasNextPage = dto.hasNext;
+            channelCursor = dto.nextCursor;
+
+            if(!url.includes("cursor=") && (!dto.data || dto.data.length===0)) {
+                channelList.innerHTML = '<li class="p-4 text-center text-gray-400">채널이 없습니다.</li>';
+                return;
+            }
+
+            if(!url.includes("cursor=")) channelList.innerHTML = "";
+
+            (dto.data||[]).forEach((ch, idx) => {
+                const li = document.createElement("li");
+                li.className = "p-3 flex items-center cursor-pointer hover:bg-gray-700 rounded-lg group transition";
+                li.setAttribute("data-channel-id", ch.channelId);
+                li.innerHTML = `<div class="flex-1 overflow-hidden"><div class="flex items-baseline justify-between"><h3 class="text-sm font-bold text-gray-200 truncate group-hover:text-white">${ch.channelName}</h3><span class="text-[10px] text-gray-500 channel-timestamp">${formatChannelTimestamp(ch.lastMessageAt)}</span></div><div class="flex items-center justify-between mt-0.5"><p class="text-xs text-gray-400 truncate w-3/4 min-h-[1rem]">${ch.lastMessageContent || "&nbsp;"}</p>${ch.unreadCount>0?`<span class="px-1.5 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold shadow-sm">${ch.unreadCount}</span>`:""}</div></div>`;
+
+                li.onclick = () => handleChannelClick(ch.channelId, ch.channelName, ch.memberCount||0);
+                li.oncontextmenu = (e) => { e.preventDefault(); showSettingsModal(ch.channelId, ch.channelName); };
+                channelList.appendChild(li);
+
+                if(idx===0 && !url.includes("cursor=")) handleChannelClick(ch.channelId, ch.channelName, ch.memberCount||0);
+            });
+        }
+
+        function handleChannelClick(channelId, name, count) {
+            if(currentActiveChannelId === channelId.toString()) return;
+
+            // [추가] 채널 변경 시 이전 채널의 읽음 요청 대기열이 있다면 취소
+            if (readDebounceTimer) {
+                clearTimeout(readDebounceTimer);
+                readDebounceTimer = null;
+            }
+
+            currentActiveChannelId = channelId.toString();
+            mainHeaderSub.textContent = name;
+
+            if (memberListDropdown) memberListDropdown.classList.add("hidden");
+            if (inviteDropdown) inviteDropdown.classList.add("hidden");
+
+            if(memberCountBadge) { memberCountBadge.textContent = count; memberCountBadge.classList.remove("hidden"); }
+            document.querySelectorAll("#channel-list li").forEach(li => {
+                li.classList.remove("bg-gray-600"); li.classList.add("hover:bg-gray-700");
+                if(li.dataset.channelId === currentActiveChannelId) {
+                    li.classList.add("bg-gray-600"); li.classList.remove("hover:bg-gray-700");
+                    const badge = li.querySelector(".bg-red-500"); if(badge) badge.remove();
+                }
+            });
+            messageList.innerHTML = '<div class="p-4 text-center text-gray-500">로딩 중...</div>';
+            messageCursor = null; messageHasNextPage = true; lastRenderedDate = null;
+            loadMessages(currentActiveChannelId, true);
+            subscribeToChannel(currentActiveChannelId);
+        }
+
+        // --- Channel Members Logic ---
+        async function loadChannelMembers(isInitial = false) {
+            if (!currentActiveChannelId || isMemberLoading || (!isInitial && !memberHasNextPage)) return;
+            isMemberLoading = true;
+            if (isInitial) {
+                memberListUl.innerHTML = "";
+                memberCursor = null;
+                memberHasNextPage = true;
+            }
+            if(memberLoadingSpinner) memberLoadingSpinner.classList.remove("hidden");
+
+            let url = `/api/channels/${currentActiveChannelId}/members?size=20`;
+            if (memberCursor) url += `&cursor=${memberCursor}`;
+
+            const res = await safeFetch(url);
+            isMemberLoading = false;
+            if(memberLoadingSpinner) memberLoadingSpinner.classList.add("hidden");
+            if (!res || !res.ok) return;
+
+            const pageResponse = await res.json();
+            memberHasNextPage = pageResponse.hasNext;
+            memberCursor = pageResponse.nextCursor;
+            renderMembers(pageResponse.data || []);
+        }
+
+        function renderMembers(members) {
+            if (members.length === 0 && memberListUl.children.length === 0) {
+                memberListUl.innerHTML = '<li class="p-4 text-center text-xs text-gray-500">참가자가 없습니다.</li>';
+                return;
+            }
+            members.forEach(m => {
+                const li = document.createElement("li");
+                li.className = "flex items-center gap-3 p-2 hover:bg-gray-700 rounded-lg cursor-pointer transition";
+                li.innerHTML = `
+                    ${getProfileHtml(m.profileImageUrl, m.nickname, m.profileIconColor, "w-8 h-8", "border border-gray-600")}
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-200 truncate flex items-center gap-1">
+                            ${m.nickname}
+                            ${m.userId.toString() === currentUserId ? '<span class="text-[10px] text-blue-400 bg-blue-400/10 px-1 rounded">나</span>' : ''}
+                        </div>
+                        <div class="text-xs text-gray-500 truncate">@${m.username}</div>
+                    </div>
+                `;
+                memberListUl.appendChild(li);
+            });
+        }
+
+        function toggleMemberMenu() {
+            if (!memberListDropdown) return;
+            const isHidden = memberListDropdown.classList.contains("hidden");
+            if (isHidden) {
+                if(inviteDropdown) inviteDropdown.classList.add("hidden");
+                memberListDropdown.classList.remove("hidden");
+                loadChannelMembers(true);
+            } else {
+                memberListDropdown.classList.add("hidden");
+            }
+        }
+
+        // --- Messages Logic ---
+        async function loadMessages(channelId, isInitial) {
+            if (isLoadingMessages || (!isInitial && !messageHasNextPage)) return;
+            isLoadingMessages = true;
+            let url = `/api/messages?channelId=${channelId}&size=20` + (messageCursor ? `&cursor=${messageCursor}` : "");
+            const oldScroll = messageListContainer.scrollHeight;
+            const res = await safeFetch(url);
+            isLoadingMessages = false;
+            if(!res) return;
+            const dto = await res.json();
+            if(isInitial) { messageList.innerHTML = ""; }
+            if(dto.userInfoDtoMap) Object.entries(dto.userInfoDtoMap).forEach(([k,v]) => userProfileCache.set(k, v));
+
+            messageHasNextPage = dto.hasNext; messageCursor = dto.nextCursor;
+            const msgs = dto.messages || [];
+
+            // [추가] 초기 진입 시 최신 메시지 읽음 처리
+            if (isInitial && msgs.length > 0) {
+                // API가 DESC(최신순)으로 내려온다고 가정하여 index 0 사용
+                // 만약 ASC라면 msgs[msgs.length-1] 사용
+                const latestMessageId = msgs[0].id || msgs[0].messageId;
+                sendMarkAsRead(channelId, latestMessageId);
+            }
+
+            let batchDate = isInitial ? lastRenderedDate : null;
+
+            // 주의: reverse()는 원본 배열을 변형하므로, 위에서 index 0을 접근한 후 reverse해야 함
+            msgs.reverse().forEach(m => {
+                const d = getYYYYMMDD(m.createdAt);
+                if(d !== batchDate) { renderDateSeparator(m.createdAt, !isInitial); batchDate = d; }
+                renderMessage(m, !isInitial);
+            });
+            if(isInitial && msgs.length>0) lastRenderedDate = batchDate;
+            if(isInitial) messageListContainer.scrollTop = messageListContainer.scrollHeight;
+            else messageListContainer.scrollTop = messageListContainer.scrollHeight - oldScroll;
+        }
+
+        function renderDateSeparator(isoString, prepend=false) {
+            const dateStr = new Date(isoString).toLocaleDateString("ko-KR", {year:"numeric", month:"long", day:"numeric"});
+            const yyyymmdd = getYYYYMMDD(isoString);
+            if (messageList.querySelector(`div[data-date-separator="${yyyymmdd}"]`)) return;
+            const html = `<div class="flex items-center my-4 px-2" data-date-separator="${yyyymmdd}"><hr class="flex-grow border-t border-gray-600"><span class="px-3 text-xs font-medium text-gray-400 bg-gray-700 rounded-full py-0.5">${dateStr}</span><hr class="flex-grow border-t border-gray-600"></div>`;
+            prepend ? messageList.insertAdjacentHTML("afterbegin", html) : messageList.insertAdjacentHTML("beforeend", html);
+        }
+
+        function renderMessage(msg, prepend) {
+            const author = msg.author || userProfileCache.get(msg.authorId);
+            if(!author) return;
+            const time = new Date(msg.createdAt).toLocaleTimeString("ko-KR", {hour:"2-digit",minute:"2-digit",hour12:false});
+            const profileHtml = getProfileHtml(author.profileImageUrl, author.nickname, author.profileIconColor, "w-9 h-9");
+            const html = `<div class="flex items-start gap-3 hover:bg-black/10 p-1 rounded -mx-1" data-timestamp="${msg.createdAt}">${profileHtml}<div class="flex-1 min-w-0"><div class="flex items-baseline gap-2"><span class="font-bold text-gray-200 text-sm hover:underline cursor-pointer">${author.nickname}</span><span class="text-[10px] text-gray-500">${time}</span></div><div class="whitespace-pre-wrap break-words text-gray-300 text-sm mt-0.5 leading-relaxed">${msg.content.trim()}</div></div></div>`;
+            prepend ? messageList.insertAdjacentHTML("afterbegin", html) : messageList.insertAdjacentHTML("beforeend", html);
+        }
+
+        function sendMessage() {
+            const content = messageInput.value.trim();
+            if(content && stompClient && stompClient.active && currentActiveChannelId) {
+                stompClient.publish({ destination: `/app/channel/${currentActiveChannelId}/message`, headers: {Authorization: `Bearer ${token}`}, body: JSON.stringify({content}) });
+                const now = new Date().toISOString();
+                const localMsg = { authorId: currentUserId, content, createdAt: now, author: userProfileCache.get(currentUserId) };
+                if(getYYYYMMDD(localMsg.createdAt) !== lastRenderedDate) {
+                    renderDateSeparator(localMsg.createdAt, false);
+                    lastRenderedDate = getYYYYMMDD(localMsg.createdAt);
+                }
+                renderMessage(localMsg, false);
+                messageListContainer.scrollTop = messageListContainer.scrollHeight;
+                messageInput.value = "";
+            }
+        }
+
+        function connectWebSocket() {
+            stompClient = new Client({
+                brokerURL: `ws://${window.location.host}/ws`,
+                connectHeaders: { Authorization: `Bearer ${token}` },
+                reconnectDelay: 5000,
+                onConnect: () => console.log("STOMP Connected"),
+                onStompError: (frame) => console.error("STOMP Error", frame)
+            });
+            stompClient.activate();
+        }
+
+        function subscribeToChannel(cid) {
+            if(currentSubscription) currentSubscription.unsubscribe();
+
+            currentSubscription = stompClient.subscribe(`/topic/channel.${cid}`, msg => {
+                const data = JSON.parse(msg.body);
+                if (!data.author) return;
+
+                const incomingAuthorId = data.author.userId || data.author.id;
+                if (!incomingAuthorId) return;
+
+                if(data.type === "MESSAGE" && incomingAuthorId.toString() !== currentUserId) {
+                    if(data.author) userProfileCache.set(incomingAuthorId.toString(), data.author);
+                    if(getYYYYMMDD(data.createdAt) !== lastRenderedDate) { renderDateSeparator(data.createdAt); lastRenderedDate = getYYYYMMDD(data.createdAt); }
+                    renderMessage(data, false);
+                    messageListContainer.scrollTop = messageListContainer.scrollHeight;
+
+                    // [추가] 상대방 메시지 수신 시 읽음 처리 예약 (디바운싱)
+                    scheduleMarkAsRead(cid, data.id || data.messageId);
+                }
+            }, { Authorization: `Bearer ${token}` });
+        }
+
+        async function switchNotificationSubTab(type) {
+            notificationList.innerHTML = '<li class="p-4 text-center text-gray-500">로딩 중...</li>';
+            notiDetailEmpty.classList.remove("hidden");
+            notiDetailContent.classList.add("hidden");
+
+            const activeClass = ["text-white", "border-blue-500"];
+            const inactiveClass = ["text-gray-500", "border-transparent", "hover:text-gray-300"];
+
+            if (type === "CHANNEL_INVITE") {
+                tabChannelInvites.classList.add(...activeClass);
+                tabChannelInvites.classList.remove(...inactiveClass);
+                tabFriendRequests.classList.add(...inactiveClass);
+                tabFriendRequests.classList.remove(...activeClass);
+
+                const res = await safeFetch(`/api/users/@me/channel-invites`);
+                if(res) {
+                    const d = await res.json();
+                    // [수정] d.channelInvites -> d.data
+                    renderNotificationList(d.data || [], type);
+                }
+            } else {
+                // 친구 요청 탭
+                tabFriendRequests.classList.add(...activeClass);
+                tabFriendRequests.classList.remove(...inactiveClass);
+                tabChannelInvites.classList.add(...inactiveClass);
+                tabChannelInvites.classList.remove(...activeClass);
+
+                const res = await safeFetch(`/api/users/@me/friend-requests`);
+                if(res) {
+                    const d = await res.json();
+                    // [수정] d.friendRequests -> d.data (여기가 핵심!)
+                    renderNotificationList(d.data || [], type);
+                }
+            }
+        }
+
+        function renderNotificationList(list, type) {
+            notificationList.innerHTML = "";
+
+            if(!list || list.length === 0) {
+                notificationList.innerHTML='<li class="p-4 text-center text-gray-500 text-sm">없음</li>';
+                return;
+            }
+
+            list.forEach(item => {
+                // [수정] JSON에 있는 그대로 "inviter"를 사용합니다.
+                const person = item.inviter;
+
+                if (!person) return; // 데이터 안전장치
+
+                const li = document.createElement("li");
+                li.className = "p-4 hover:bg-gray-700 cursor-pointer border-b border-gray-700 transition";
+
+                // 제목 설정 (채널 초대면 채널명, 친구 신청이면 "친구 요청")
+                const title = (type === "CHANNEL_INVITE") ? item.channelName : "친구 요청";
+
+                li.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        ${getProfileHtml(person.profileImageUrl, person.nickname, person.profileIconColor, "w-8 h-8")}
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-200">${title}</h4>
+                            <p class="text-xs text-gray-400">From: ${person.nickname}</p>
+                        </div>
+                    </div>`;
+
+                li.onclick = () => showNotiDetail(item, type);
+                notificationList.appendChild(li);
+            });
+        }
+
+        function showNotiDetail(item, type) {
+            notiDetailEmpty.classList.add("hidden");
+            notiDetailContent.classList.remove("hidden");
+
+            // [수정] 여기서도 inviter 사용
+            const person = item.inviter;
+
+            notiDetailProfileContainer.innerHTML = getProfileHtml(person.profileImageUrl, person.nickname, person.profileIconColor, "w-24 h-24", "border-4 border-gray-700 shadow-xl");
+
+            if(type === "CHANNEL_INVITE") {
+                detailTitle.textContent = "채널 초대";
+                detailDesc.innerHTML = `<span class="font-bold text-white">${person.nickname}</span>님이 채널 <br><span class="text-blue-400">[${item.channelName}]</span>에 초대했습니다.`;
+                detailBtnAccept.onclick = () => handleAPI(`/api/channel-invites/${item.id}/accept`, "POST", type);
+                detailBtnReject.onclick = () => handleAPI(`/api/channel-invites/${item.id}/reject`, "POST", type);
+            } else {
+                detailTitle.textContent = "친구 요청";
+                detailDesc.innerHTML = `<span class="font-bold text-white">${person.nickname}</span>님이 친구 요청을 보냈습니다.`;
+                // API 주소는 기존 유지
+                detailBtnAccept.onclick = () => handleAPI(`/api/friend-requests/${item.id}/accept`, "POST", type);
+                detailBtnReject.onclick = () => handleAPI(`/api/friend-requests/${item.id}/reject`, "POST", type);
+            }
+        }
+
+        async function handleAPI(url, method, type) {
+            const res = await safeFetch(url, {method});
+            if(res && res.ok) {
+                switchNotificationSubTab(type);
+                if(method==="POST" && type==="CHANNEL_INVITE" && url.includes("accept")) { switchMainTab("CHAT"); loadChannels(); }
+                if(method==="POST" && type==="FRIEND_REQUEST" && url.includes("accept")) { loadGlobalProfile(); loadFriendsTab(); }
+            } else alert("요청 처리에 실패했습니다.");
+        }
+
+        function toggleInviteMenu() {
+            if (!inviteDropdown) return;
+            const isHidden = inviteDropdown.classList.contains("hidden");
+
+            if (isHidden) {
+                if(memberListDropdown) memberListDropdown.classList.add("hidden");
+                if(!currentActiveChannelId) { alert("초대할 채널을 먼저 선택하세요."); return; }
+                inviteDropdown.classList.remove("hidden");
+                loadFriendsForInvite(true);
+            } else {
+                inviteDropdown.classList.add("hidden");
+            }
+        }
+
+        async function loadFriendsForInvite(isInitial = false) {
+            if (isInviteFriendLoading || (!isInitial && !inviteFriendHasNextPage)) return;
+            isInviteFriendLoading = true;
+
+            if (isInitial) {
+                inviteFriendList.innerHTML = "";
+                inviteFriendCursor = null;
+                inviteFriendHasNextPage = true;
+            }
+
+            let url = `/api/users/@me/friends?size=20`;
+            if (inviteFriendCursor) url += `&cursor=${inviteFriendCursor}`;
+
+            const res = await safeFetch(url);
+            isInviteFriendLoading = false;
+
+            if (!res || !res.ok) {
+                if(isInitial) inviteFriendList.innerHTML = '<li class="p-4 text-center text-gray-500 text-xs">친구 목록을 불러올 수 없습니다.</li>';
+                return;
+            }
+
+            const dto = await res.json();
+            const users = dto.users || [];
+            inviteFriendHasNextPage = dto.hasNext;
+
+            if (isInitial && users.length === 0) {
+                inviteFriendList.innerHTML = '<li class="p-4 text-center text-gray-500 text-xs">초대할 친구가 없습니다.</li>';
+                return;
+            }
+
+            users.forEach(u => {
+                const li = document.createElement("li");
+                li.className = "flex items-center gap-2 p-2 hover:bg-gray-800 transition border-b border-gray-700/50";
+                li.innerHTML = `
+                    ${getProfileHtml(u.profileImageUrl, u.nickname, u.profileIconColor, "w-7 h-7", "border border-gray-600")}
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs font-bold text-gray-200 truncate">${u.nickname}</div>
+                        <div class="text-[10px] text-gray-500 truncate">@${u.username}</div>
+                    </div>
+                    <button class="invite-action-btn bg-blue-600 hover:bg-blue-500 text-white text-[10px] px-2 py-1 rounded font-bold transition shadow-sm"
+                            data-user-id="${u.id}" data-user-name="${u.nickname}">
+                        초대
+                    </button>
+                `;
+                inviteFriendList.appendChild(li);
+            });
+
+            document.querySelectorAll(".invite-action-btn").forEach(btn => {
+                btn.onclick = (e) => {
+                    const uid = e.target.getAttribute("data-user-id");
+                    const uname = e.target.getAttribute("data-user-name");
+                    sendChannelInvite(uid, uname, e.target);
+                };
+            });
+        }
+
+        async function sendChannelInvite(userId, nickname, btnElement) {
+            if (!currentActiveChannelId) return;
+            if (!confirm(`${nickname}님을 현재 채널에 초대하시겠습니까?`)) return;
+
+            const payload = {
+                channelId: currentActiveChannelId,
+                inviteeId: userId
+            };
+
+            const res = await safeFetch("/api/channel-invites", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+
+            if (res && res.ok) {
+                alert("초대장을 보냈습니다.");
+                btnElement.textContent = "완료";
+                btnElement.classList.remove("bg-blue-600", "hover:bg-blue-500");
+                btnElement.classList.add("bg-gray-600", "cursor-not-allowed");
+                btnElement.disabled = true;
+            } else {
+                alert("초대에 실패했습니다.");
+            }
+        }
+
+        // Listeners
+        if(navChat) navChat.onclick = () => switchMainTab("CHAT");
+        if(navNotification) navNotification.onclick = () => switchMainTab("NOTIFICATION");
+        if(navFriends) navFriends.onclick = () => switchMainTab("FRIENDS");
+        if(createChannelButton) createChannelButton.onclick = () => { createChannelModal.classList.remove("hidden"); channelNameInput.focus(); };
+        if(cancelCreateButton) cancelCreateButton.onclick = () => { createChannelModal.classList.add("hidden"); channelNameInput.value=""; };
+
+        if(confirmCreateButton) confirmCreateButton.onclick = async () => {
+            const name = channelNameInput.value.trim(); if(!name) return;
+            const res = await safeFetch("/api/channels", {method:"POST", body:JSON.stringify({channelName:name})});
+            if(res && res.ok) {
+                createChannelModal.classList.add("hidden");
+                channelNameInput.value="";
+                channelList.innerHTML = "";
+                channelCursor = null;
+                channelHasNextPage = true;
+                loadChannels();
+            }
+        };
+        if(closeSettingsButton) closeSettingsButton.onclick = () => settingsModal.classList.add("hidden");
+        if(sendButton) sendButton.onclick = sendMessage;
+        if(messageInput) messageInput.onkeydown = (e) => { if(e.key==="Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
+        if(channelListContainer) channelListContainer.onscroll = () => { if(channelListContainer.scrollTop+channelListContainer.clientHeight >= channelListContainer.scrollHeight-50) loadChannels(); };
+        if(messageListContainer) messageListContainer.onscroll = () => { if(messageListContainer.scrollTop===0 && !isLoadingMessages && messageHasNextPage) loadMessages(currentActiveChannelId, false); };
+        if(tabChannelInvites) tabChannelInvites.onclick = () => switchNotificationSubTab("CHANNEL_INVITE");
+        if(tabFriendRequests) tabFriendRequests.onclick = () => switchNotificationSubTab("FRIEND_REQUEST");
+
+        if(toggleMemberListBtn) {
+            toggleMemberListBtn.onclick = (e) => { e.stopPropagation(); toggleMemberMenu(); };
+        }
+        if(closeMemberListBtn) {
+            closeMemberListBtn.onclick = () => memberListDropdown.classList.add("hidden");
+        }
+        if(memberListContainer) {
+            memberListContainer.onscroll = () => {
+                if(memberListContainer.scrollTop + memberListContainer.clientHeight >= memberListContainer.scrollHeight - 20) {
+                    loadChannelMembers(false);
+                }
+            };
+        }
+
+        if (toggleInviteBtn) {
+            toggleInviteBtn.onclick = (e) => { e.stopPropagation(); toggleInviteMenu(); };
+        }
+        if (closeInviteBtn) {
+            closeInviteBtn.onclick = () => inviteDropdown.classList.add("hidden");
+        }
+        if (inviteUsernameBtn) {
+            inviteUsernameBtn.onclick = () => {
+                const val = inviteUsernameInput.value.trim();
+                if(!val) return;
+                alert(`'${val}' 사용자명으로 초대하는 기능은 백엔드 구현 필요`);
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if(memberListDropdown && !memberListDropdown.classList.contains("hidden") &&
+               !memberListDropdown.contains(e.target) && !toggleMemberListBtn.contains(e.target)) {
+                memberListDropdown.classList.add("hidden");
+            }
+            if(inviteDropdown && !inviteDropdown.classList.contains("hidden") &&
+               !inviteDropdown.contains(e.target) && !toggleInviteBtn.contains(e.target)) {
+                inviteDropdown.classList.add("hidden");
+            }
+        });
+
+        if(logoutButton) {
+            logoutButton.onclick = async () => {
+                if(confirm("정말 로그아웃 하시겠습니까?")) {
+                    try { await safeFetch("/api/auth/logout", { method: "POST" }); }
+                    catch (e) { console.error("Logout API Error:", e); }
+                    finally { localStorage.removeItem("accessToken"); window.location.href = "/login"; }
+                }
+            };
+        }
+
+        switchMainTab("CHAT");
+        loadChannels();
+        loadGlobalProfile();
+        connectWebSocket();
+    });
+</script>
+</body>
+</html>

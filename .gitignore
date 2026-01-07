@@ -35,3 +35,30 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### OS Specific ###
+.DS_Store
+Thumbs.db
+
+### Logs ###
+*.log
+logs/
+
+### QueryDSL ###
+/src/main/generated/
+
+### Sensitive Information & Configuration ###
+.env
+/my-key.pem
+application-prod.yml
+application-dev.yml
+application-secret.yml
+secrets/
+
+### Docker ###
+# Docker 관련 파일 중 로컬/개인 설정이 들어갈 수 있는 것들
+docker-compose.override.yml
+
+### Local Database Data ###
+data/
+grafana-data/

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅 회원가입</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .check-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
+        }
+
+        /* 프로필 이미지 미리보기 (원형) */
+        .profile-preview-circle {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 50%;
+            border: 2px solid #cbd5e0; /* gray-300 */
+            background-color: #f1f5f9; /* gray-100 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b; /* gray-500 */
+            font-size: 0.875rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .profile-preview-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Cropper.js 모달 내부 이미지 컨테이너 */
+        #cropper-image-container {
+            width: 100%;
+            max-width: 400px;
+            height: 400px;
+            margin: 0 auto;
+        }
+        #cropper-image-container img {
+            max-width: 100%;
+            display: block;
+        }
+
+        /* * 요청사항 1: Cropper의 사각형 영역 안에 원형 가이드 표시
+         * (크기 조절이 가능하도록 cropper-face도 원형으로 맞춥니다)
+        */
+        .cropper-view-box {
+            border-radius: 50% !important;
+            box-shadow: 0 0 0 2px white inset; /* 원형 가이드라인 */
+        }
+        .cropper-face { /* 크기 조절/이동을 위한 드래그 영역 */
+             border-radius: 50% !important;
+        }
+        .cropper-dashed {
+            display: none !important;
+        }
+
+        /* * 요청사항 2: 색상 선택 그리드 및 체크 표시
+        */
+        .color-radio-label {
+            display: flex; /* Flex로 SVG 아이콘 중앙 정렬 */
+            justify-content: center;
+            align-items: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 0.375rem; /* rounded-md */
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s ease-in-out;
+            position: relative; /* SVG 위치 기준 */
+        }
+        /* SVG 아이콘 기본 숨김 (w-6 h-6 text-white) */
+        .color-radio-label svg {
+            display: none;
+            width: 24px;
+            height: 24px;
+            color: white;
+            position: absolute;
+        }
+        /* 라디오 버튼이 체크되면 라벨에 테두리 표시 */
+        input[type="radio"]:checked + .color-radio-label {
+            border-color: #3b82f6; /* blue-500 */
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        /* 라디오 버튼이 체크되면 SVG 아이콘 보이기 */
+        input[type="radio"]:checked + .color-radio-label svg {
+            display: block;
+        }
+        input[type="radio"].sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-12">
+
+<div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+
+    <div class="text-center">
+        <h1 class="text-3xl font-bold text-gray-900">회원가입</h1>
+        <p class="mt-2 text-sm text-gray-600">새 계정을 만들어 채팅을 시작하세요.</p>
+    </div>
+
+    <form id="signup-form" class="space-y-4">
+
+        <div>
+            <label for="loginId" class="text-sm font-medium text-gray-700">아이디 (로그인용)</label>
+            <div class="flex items-center mt-1 space-x-2">
+                <input type="text" id="loginId" name="loginId" required
+                       class="flex-grow w-full px-3 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                <button type="button" id="check-loginId-btn"
+                        class="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 check-button transition">
+                    중복확인
+                </button>
+            </div>
+            <p id="loginId-feedback" class="mt-1 text-xs h-4"></p>
+        </div>
+
+        <div>
+            <label for="username" class="text-sm font-medium text-gray-700">사용자 이름 (공개 ID)</label>
+            <div class="flex items-center mt-1 space-x-2">
+                <input type="text" id="username" name="username" required
+                       class="flex-grow w-full px-3 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                <button type="button" id="check-username-btn"
+                        class="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 check-button transition">
+                    중복확인
+                </button>
+            </div>
+            <p id="username-feedback" class="mt-1 text-xs h-4"></p>
+            <p class="mt-1 text-xs text-gray-500">친구 추가, 검색 시 사용될 고유한 ID입니다.</p>
+        </div>
+
+        <div>
+            <label for="nickname" class="text-sm font-medium text-gray-700">닉네임 (채팅 표시용)</label>
+            <input type="text" id="nickname" name="nickname" required maxlength="15"
+                   class="w-full px-3 py-2 mt-1 text-gray-900 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            <p class="mt-1 text-xs text-gray-500">채팅방에서 다른 사용자에게 보여질 이름입니다. (최대 15자)</p>
+        </div>
+
+        <div>
+            <label for="password" class="text-sm font-medium text-gray-700">비밀번호</label>
+            <input type="password" id="password" name="password" required
+                   class="w-full px-3 py-2 mt-1 text-gray-900 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+        </div>
+
+        <div>
+            <label for="password-confirm" class="text-sm font-medium text-gray-700">비밀번호 확인</label>
+            <input type="password" id="password-confirm" name="password-confirm" required
+                   class="w-full px-3 py-2 mt-1 text-gray-900 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            <p id="password-feedback" class="mt-1 text-xs h-4"></p>
+        </div>
+
+        <div>
+            <label class="text-sm font-medium text-gray-700">프로필 이미지</label>
+            <div class="mt-2 flex items-center space-x-4">
+                <div class="profile-preview-circle">
+                    <img id="profile-image-preview" src="" alt="프로필 이미지 미리보기" class="hidden">
+                    <span id="profile-placeholder" class="px-2">사진 선택</span>
+                </div>
+                <div>
+                    <input type="file" id="profileImageInput" accept="image/*" class="sr-only">
+                    <label for="profileImageInput"
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer transition">
+                        이미지 선택
+                    </label>
+                    <p class="mt-1 text-xs text-gray-500">프로필 사진을 업로드하세요.</p>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <label class="text-sm font-medium text-gray-700">프로필 배경색</label>
+            <p class="mt-1 text-xs text-gray-500">사진이 없을 경우 사용될 배경색입니다.</p>
+            <div id="color-grid" class="mt-2 grid grid-cols-5 gap-3 justify-center max-w-xs mx-auto">
+            </div>
+        </div>
+
+        <div>
+            <button type="submit" id="signup-btn"
+                    class="w-full px-4 py-2 text-lg font-semibold text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none">
+                가입하기
+            </button>
+        </div>
+    </form>
+
+    <p class="text-sm text-center text-gray-600">
+        이미 계정이 있으신가요?
+        <a href="/login" class="font-medium text-blue-600 hover:text-blue-500 hover:underline">로그인</a>
+    </p>
+</div>
+
+<div id="cropper-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 hidden">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">프로필 이미지 자르기</h3>
+        <div id="cropper-image-container">
+            <img id="cropper-image" src="" alt="이미지 자르기">
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+            <button type="button" id="cropper-cancel-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition">
+                취소
+            </button>
+            <button type="button" id="cropper-confirm-btn" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition">
+                적용
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // --- DOM 요소 ---
+    const signupForm = document.getElementById('signup-form');
+    const loginIdInput = document.getElementById('loginId');
+    const checkLoginIdBtn = document.getElementById('check-loginId-btn');
+    const loginIdFeedback = document.getElementById('loginId-feedback');
+    const usernameInput = document.getElementById('username');
+    const checkUsernameBtn = document.getElementById('check-username-btn');
+    const usernameFeedback = document.getElementById('username-feedback');
+    const nicknameInput = document.getElementById('nickname');
+    const passwordInput = document.getElementById('password');
+    const passwordConfirmInput = document.getElementById('password-confirm');
+    const passwordFeedback = document.getElementById('password-feedback');
+    const profileImageInput = document.getElementById('profileImageInput');
+    const profileImagePreview = document.getElementById('profile-image-preview');
+    const profilePlaceholder = document.getElementById('profile-placeholder');
+    const colorGrid = document.getElementById('color-grid');
+    const signupBtn = document.getElementById('signup-btn');
+
+    // --- Cropper 모달 요소 ---
+    const cropperModal = document.getElementById('cropper-modal');
+    const cropperImage = document.getElementById('cropper-image');
+    const cropperConfirmBtn = document.getElementById('cropper-confirm-btn');
+    const cropperCancelBtn = document.getElementById('cropper-cancel-btn');
+    let cropper = null; // Cropper.js 인스턴스
+
+    // --- 상태 변수 ---
+    let isLoginIdAvailable = false;
+    let isUsernameAvailable = false;
+    let arePasswordsMatching = false;
+    let croppedImageBlob = null; // 잘라낸 이미지 Blob 데이터
+
+    // --- 프로필 색상 목록 (15개) ---
+    const PROFILE_COLORS = [
+        "bg-red-500", "bg-orange-500", "bg-amber-500", "bg-yellow-500", "bg-lime-500",
+        "bg-green-500", "bg-emerald-500", "bg-sky-500", "bg-blue-500", "bg-indigo-500",
+        "bg-violet-500", "bg-purple-500", "bg-fuchsia-500", "bg-pink-500", "bg-rose-500"
+    ];
+
+    // * (수정) 5x3 색상 그리드 생성 (체크 아이콘 SVG 포함)
+    function createColorGrid() {
+        PROFILE_COLORS.forEach((colorClass, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'relative flex justify-center items-center';
+
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.id = `color-${index}`;
+            radio.name = 'profileColor';
+            radio.value = colorClass;
+            radio.className = 'sr-only';
+
+            const label = document.createElement('label');
+            label.htmlFor = `color-${index}`;
+            label.className = `color-radio-label ${colorClass}`;
+
+            // * 체크 아이콘 SVG 생성
+            const checkSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            checkSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            checkSvg.setAttribute('viewBox', '0 0 20 20');
+            checkSvg.setAttribute('fill', 'currentColor');
+            checkSvg.setAttribute('class', 'w-6 h-6'); // CSS가 display, color 등을 제어
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('fill-rule', 'evenodd');
+            path.setAttribute('d', 'M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z');
+            path.setAttribute('clip-rule', 'evenodd');
+
+            checkSvg.appendChild(path);
+            label.appendChild(checkSvg); // 라벨에 SVG 추가
+
+            wrapper.appendChild(radio);
+            wrapper.appendChild(label);
+            colorGrid.appendChild(wrapper);
+        });
+    }
+    createColorGrid();
+
+    // --- 회원가입 버튼 상태 업데이트 ---
+    function updateSignupButtonState() {
+        const isNicknameValid = nicknameInput.value.trim().length > 0;
+        signupBtn.disabled = !(isLoginIdAvailable && isUsernameAvailable && arePasswordsMatching && isNicknameValid);
+    }
+    updateSignupButtonState();
+
+    // (공통) 중복 확인 피드백 처리 함수
+    function setFeedback(element, message, isSuccess) {
+        element.textContent = message;
+        element.className = isSuccess ? 'mt-1 text-xs text-green-600 h-4' : 'mt-1 text-xs text-red-500 h-4';
+    }
+
+    // (공통) 중복 확인 API 요청 함수
+    async function checkAvailability(url, inputElement, feedbackElement) {
+        const value = inputElement.value.trim();
+        if (!value) {
+            setFeedback(feedbackElement, '값을 입력해주세요.', false);
+            return false;
+        }
+        try {
+            const response = await fetch(`${url}${encodeURIComponent(value)}`);
+            const result = await response.json();
+            if (response.ok && result.isAvailable) {
+                setFeedback(feedbackElement, '사용 가능합니다.', true);
+                return true;
+            } else {
+                setFeedback(feedbackElement, result.message || '이미 사용 중입니다.', false);
+                return false;
+            }
+        } catch (error) {
+            console.error('중복 확인 오류:', error);
+            setFeedback(feedbackElement, '확인 중 오류가 발생했습니다.', false);
+            return false;
+        }
+    }
+
+    // --- 이벤트 리스너 ---
+
+    // 1. loginId 중복 확인
+    checkLoginIdBtn.addEventListener('click', async () => {
+        isLoginIdAvailable = await checkAvailability('/api/users/check-loginId?loginId=', loginIdInput, loginIdFeedback);
+        updateSignupButtonState();
+    });
+    loginIdInput.addEventListener('input', () => {
+        isLoginIdAvailable = false;
+        loginIdFeedback.textContent = '';
+        updateSignupButtonState();
+    });
+
+    // 3. username 중복 확인
+    checkUsernameBtn.addEventListener('click', async () => {
+        isUsernameAvailable = await checkAvailability('/api/users/check-username?username=', usernameInput, usernameFeedback);
+        updateSignupButtonState();
+    });
+    usernameInput.addEventListener('input', () => {
+        isUsernameAvailable = false;
+        usernameFeedback.textContent = '';
+        updateSignupButtonState();
+    });
+
+    // 4. nickname 입력
+    nicknameInput.addEventListener('input', updateSignupButtonState);
+
+    // 2. 비밀번호 일치 확인
+    function checkPasswords() {
+        const password = passwordInput.value;
+        const passwordConfirm = passwordConfirmInput.value;
+        if (password && passwordConfirm) {
+            if (password === passwordConfirm) {
+                setFeedback(passwordFeedback, '비밀번호가 일치합니다.', true);
+                arePasswordsMatching = true;
+            } else {
+                setFeedback(passwordFeedback, '비밀번호가 일치하지 않습니다.', false);
+                arePasswordsMatching = false;
+            }
+        } else {
+            passwordFeedback.textContent = '';
+            arePasswordsMatching = false;
+        }
+        updateSignupButtonState();
+    }
+    passwordInput.addEventListener('input', checkPasswords);
+    passwordConfirmInput.addEventListener('input', checkPasswords);
+
+    // 5. 프로필 이미지 선택 및 모달 열기
+    profileImageInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                cropperModal.classList.remove('hidden');
+                cropperImage.src = e.target.result;
+
+                if (cropper) cropper.destroy();
+
+                // * (수정) Cropper.js 옵션 변경
+                cropper = new Cropper(cropperImage, {
+                    aspectRatio: 1 / 1,      // 1:1 비율
+                    viewMode: 1,             // 크롭 박스가 캔버스 밖으로 나가지 않게
+                    dragMode: 'move',        // 이미지 이동 (기본값)
+                    autoCropArea: 0.8,       // 자동 크롭 영역 크기
+                    movable: true,           // 이미지 이동 가능
+                    scalable: true,          // 이미지 확대/축소 가능
+                    zoomable: true,          // 휠로 이미지 확대/축소 가능
+                    guides: false,           // 가이드선 숨기기
+                    center: false,           // 중앙선 숨기기
+                    background: true,        // 기본 어두운 배경 사용
+                    cropBoxMovable: true,    // * (변경) 크롭 박스 이동 가능
+                    cropBoxResizable: true,  // * (변경) 크롭 박스 크기 조절 가능
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+        event.target.value = null; // 동일 파일 재선택을 위해 초기화
+    });
+
+    // Cropper 모달 닫기 (취소)
+    cropperCancelBtn.addEventListener('click', () => {
+        cropperModal.classList.add('hidden');
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+    });
+
+    // Cropper 모달 확인 (자르기 적용)
+    cropperConfirmBtn.addEventListener('click', () => {
+        if (!cropper) return;
+
+        const canvas = cropper.getCroppedCanvas({
+            width: 512, height: 512, // 고화질로 크롭
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+        });
+
+        canvas.toBlob((blob) => {
+            croppedImageBlob = blob; // Blob 데이터 저장
+            const previewUrl = URL.createObjectURL(blob);
+            profileImagePreview.src = previewUrl;
+            profileImagePreview.classList.remove('hidden');
+            profilePlaceholder.classList.add('hidden');
+
+            cropperModal.classList.add('hidden');
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+        }, 'image/png', 0.9);
+    });
+
+    // --- 최종 회원가입 폼 제출 ---
+    signupForm.addEventListener('submit', async (event)=> {
+        event.preventDefault();
+
+        if (signupBtn.disabled) {
+             alert('아이디/사용자 이름 중복 확인, 닉네임 입력, 비밀번호 일치 여부를 확인해주세요.');
+             return;
+        }
+
+        const loginId = loginIdInput.value.trim();
+        const password = passwordInput.value;
+        const username = usernameInput.value.trim();
+        const nickname = nicknameInput.value.trim();
+        const selectedColorRadio = document.querySelector('input[name="profileColor"]:checked');
+        const profileColor = selectedColorRadio ? selectedColorRadio.value : null;
+
+        const formData = new FormData();
+
+        // DTO 객체 생성
+        const signupDto = {
+            loginId: loginId,
+            password: password,
+            username: username,
+            nickname: nickname,
+            profileColor: profileColor
+        };
+
+        // DTO를 JSON Blob으로 변환하여 FormData에 추가
+        formData.append('dto', new Blob([JSON.stringify(signupDto)], {
+            type: "application/json"
+        }));
+
+        // 잘라낸 이미지 Blob이 있으면 FormData에 추가
+        if (croppedImageBlob) {
+            formData.append('profileImage', croppedImageBlob, `${username || loginId}-profile.png`);
+        }
+
+        try {
+            const response = await fetch('/api/auth/join', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                alert('회원가입이 성공적으로 완료되었습니다. 로그인 페이지로 이동합니다.');
+                window.location.href = '/login';
+            } else {
+                const result = await response.json();
+                alert(result.message || '회원가입에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('회원가입 요청 중 오류 발생:', error);
+            alert('회원가입 중 문제가 발생했습니다.');
+        }
+    });
+
+</script>
+
+</body>
+</html>
