@@ -32,12 +32,12 @@ import java.util.*;
 public class  ChannelService {
 
     private final ChannelRepository channelRepository;
-    private final ChannelMemberRepository channelMemberRepository;
-    private final ChannelInviteRepository channelInviteRepository;
-    private final MessageRepository messageRepository;
-    private final UserRepository userRepository;
 
-    private final RedisService redisService;
+    private final ChannelMemberRepository channelMemberRepository;
+
+    private final MessageRepository messageRepository;
+
+    private final UserRepository userRepository;
 
     @Transactional
     public ChannelSummaryResponse create(Long userId, ChannelCreateRequest channelCreateRequest) {
@@ -62,15 +62,10 @@ public class  ChannelService {
             return new PageResponse<>(Collections.emptyList(), null, false);
         }
 
-        // 2. [데이터 보정] 안 읽은 메시지 수 계산 (Redis + DB Hybrid Logic)
         Map<Long, Integer> unreadCounts = resolveUnreadCounts(userId, projections);
 
-        // 3. [데이터 가공] 응답 DTO 변환
         List<ChannelSummaryResponse> responses = createResponses(projections, unreadCounts);
-
-        // 4. [커서 계산] 다음 페이지 커서 추출
         String nextCursor = getNextCursor(projectionSlice, responses);
-
         return new PageResponse<>(responses, nextCursor, projectionSlice.hasNext());
     }
 
@@ -115,9 +110,8 @@ public class  ChannelService {
     @Transactional
     public void markAsRead(Long channelId, Long userId, Long requestMessageId) {
         channelMemberRepository.updateLastReadMessageIdSafe(channelId, userId, requestMessageId);
-
-        String key = "unread:" + userId + ":" + channelId;
-        redisService.setValues(key, "0", Duration.ofHours(1));
+        
+        // Redis 갱신 로직 제거 (DB 조회로 변경되었으므로 불필요)
     }
 
     @Transactional(readOnly = true)
@@ -136,51 +130,21 @@ public class  ChannelService {
     }
 
     /**
-     * 핵심 로직: Redis 캐시 조회 -> Cache Miss 수집 -> DB Bulk 조회 -> Redis 갱신 -> 최종 Map 반환
+     * 핵심 로직: DB Bulk 조회 -> 최종 Map 반환 (Redis 제거됨)
      */
     private Map<Long, Integer> resolveUnreadCounts(Long userId, List<ChannelSummaryProjection> projections) {
-        List<String> redisKeys = projections.stream()
-                .map(p -> generateUnreadKey(userId, p.getChannelId()))
-                .toList();
+        Map<Long, Long> channelReadMap = new HashMap<>();
 
-        List<String> redisValues = redisService.getValuesList(redisKeys);
-
-        Map<Long, Integer> resultMap = new HashMap<>();
-        Map<Long, Long> cacheMissChannels = new HashMap<>();
-
-        // 1. Redis 결과 분류
-        for (int i = 0; i < projections.size(); i++) {
-            ChannelSummaryProjection proj = projections.get(i);
-            String redisVal = redisValues.get(i);
-
-            if (redisVal != null) {
-                resultMap.put(proj.getChannelId(), Integer.parseInt(redisVal));
-            } else {
-                cacheMissChannels.put(proj.getChannelId(), proj.getMyLastReadMessageId());
-            }
+        for (ChannelSummaryProjection proj : projections) {
+            channelReadMap.put(proj.getChannelId(), proj.getMyLastReadMessageId());
         }
 
-        // 2. Cache Miss 처리 (DB Bulk Query + Redis Repair)
-        if (!cacheMissChannels.isEmpty()) {
-            Map<Long, Integer> dbCounts = messageRepository.countUnreadMessagesBatch(cacheMissChannels);
-
-            for (Map.Entry<Long, Long> entry : cacheMissChannels.entrySet()) {
-                Long channelId = entry.getKey();
-                int count = dbCounts.getOrDefault(channelId, 0);
-
-                // 결과 맵에 추가
-                resultMap.put(channelId, count);
-
-                // Redis 복구 (Async로 처리하면 더 좋음)
-                redisService.setValues(
-                        generateUnreadKey(userId, channelId),
-                        String.valueOf(count),
-                        Duration.ofHours(1)
-                );
-            }
+        if (channelReadMap.isEmpty()) {
+            return Collections.emptyMap();
         }
 
-        return resultMap;
+        // DB에서 일괄 조회
+        return messageRepository.countUnreadMessagesBatch(channelReadMap);
     }
 
     private List<ChannelSummaryResponse> createResponses(List<ChannelSummaryProjection> projections, Map<Long, Integer> unreadCounts) {
@@ -197,9 +161,5 @@ public class  ChannelService {
             return responses.get(responses.size() - 1).getLastMessageId().toString();
         }
         return null;
-    }
-
-    private String generateUnreadKey(Long userId, Long channelId) {
-        return "unread:" + userId + ":" + channelId;
     }
 }
