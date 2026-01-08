@@ -40,8 +40,10 @@ management:
   endpoints:
     web:
       exposure:
-        # [핵심] prometheus 엔드포인트를 엽니다.
-        include: health, info, prometheus
+        include: prometheus, health, info, metrics # metrics 추가
+  metrics:
+    enable:
+      hikaricp: true # HikariCP 지표 활성화
   endpoint:
     prometheus:
       enabled: true

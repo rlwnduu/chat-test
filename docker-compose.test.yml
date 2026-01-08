@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  my-chat-app:
+    # 기존 설정(이미지, 포트, 볼륨 등)은 docker-compose.yml에서 상속받음
+    # 여기서는 성능 제한만 덮어씌움 (Override)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'        # CPU 1개로 제한
+          memory: 1G         # 메모리 1GB로 제한 (EC2 t2.micro 급)
