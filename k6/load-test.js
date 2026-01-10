@@ -3,8 +3,8 @@ import { check, sleep } from 'k6';
 
 export const options = {
   stages: [
-    { duration: '10s', target: 50 }, // 10명 -> 50명으로 증가
-    { duration: '1m', target: 50 },  // 1분간 50명 유지 (이때가 진짜 승부처)
+    { duration: '10s', target: 30 }, // 10명 -> 50명으로 증가
+    { duration: '1m', target: 30 },  // 1분간 50명 유지 (이때가 진짜 승부처)
     { duration: '10s', target: 0 },
   ],
 };

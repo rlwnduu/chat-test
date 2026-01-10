@@ -15,8 +15,8 @@ spring:
   datasource:
     hikari:
       auto-commit: false
-      maximum-pool-size: 30
-      minimum-idle: 30
+      maximum-pool-size: 15
+      minimum-idle: 15
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3307/chat?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
