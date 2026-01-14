@@ -5,37 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>채팅 로그인</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        (async function () {
-          const token = localStorage.getItem("accessToken");
-
-          if (!token) {
-            return;
-          }
-
-          try {
-            // 2. [수정됨] 가벼운 검증용 엔드포인트로 변경
-            const response = await fetch("/api/auth/validate", {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            });
-
-            if (response.ok) {
-              // 👈 200 OK (성공)
-              window.location.href = "/chat";
-            } else {
-              // 👈 401 Unauthorized (실패)
-              localStorage.removeItem("accessToken");
-            }
-          } catch (error) {
-            console.error("토큰 검증 중 네트워크 오류:", error);
-            localStorage.removeItem("accessToken");
-          }
-        })();
-    </script>
     <link
             rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
@@ -122,15 +91,19 @@
 
       const loginId = document.getElementById("loginId").value;
       const password = document.getElementById("password").value;
-      const loginData = { loginId, password };
+
+      // [수정] JSON 대신 폼 데이터 형식으로 변환
+      const formData = new URLSearchParams();
+      formData.append('loginId', loginId);
+      formData.append('password', password);
 
       try {
         const response = await fetch("/api/auth/login", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded", // [수정] Content-Type 변경
           },
-          body: JSON.stringify(loginData),
+          body: formData, // [수정] body 변경
         });
 
         // 2. 서버 내부 오류(500번대)인 경우, 에러 페이지로 리다이렉트합니다.
@@ -144,19 +117,13 @@
           return; // 함수 실행 중단
         }
 
-        // 3. 응답 본문을 JSON으로 파싱합니다. (500번대가 아니므로 2xx 아니면 4xx)
-        const result = await response.json();
-
         if (response.ok) {
-          // 4. [수정] 로그인 성공: alert 없이 토큰 저장 후 메인 페이지로 즉시 이동
-          localStorage.setItem("accessToken", result.accessToken);
-
-          // 메인 페이지('/')로 이동합니다. (원래 '/chat'이었습니다. 필요시 수정하세요.)
+          // 4. [수정] 로그인 성공: 세션 방식이므로 토큰 저장 없이 메인 페이지로 이동
           window.location.href = "/chat";
         } else {
           // 5. [수정] 로그인 실패 (4xx 오류): alert 대신 <p> 태그에 메시지 표시
-          errorMessage.textContent =
-            result.message || "아이디 또는 비밀번호가 올바르지 않습니다.";
+          // 서버가 JSON 에러 메시지를 주지 않을 수 있으므로 고정 메시지 사용
+          errorMessage.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
         }
       } catch (error) {
         // 6. [수정] 네트워크 오류 등: alert 대신 에러 페이지로 리다이렉트

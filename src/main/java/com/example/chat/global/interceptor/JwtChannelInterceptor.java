@@ -20,8 +20,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
+/**
+ * 세션 기반 인증으로 변경됨에 따라 더 이상 사용하지 않습니다.
+ * WebSocketConfig에서 제거되었습니다.
+ */
+@Deprecated
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
 public class JwtChannelInterceptor implements ChannelInterceptor {
 

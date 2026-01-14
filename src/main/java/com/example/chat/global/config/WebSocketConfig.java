@@ -1,6 +1,5 @@
 package com.example.chat.global.config;
 
-import com.example.chat.global.interceptor.JwtChannelInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +28,6 @@ import java.util.List;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final ApplicationContext applicationContext;
-    private final JwtChannelInterceptor jwtChannelInterceptor;
     private final AuthorizationManager<Message<?>> authorizationManager;
 
 
@@ -54,7 +52,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         AuthorizationChannelInterceptor authz = new AuthorizationChannelInterceptor(authorizationManager);
         AuthorizationEventPublisher publisher = new SpringAuthorizationEventPublisher(applicationContext);
         authz.setAuthorizationEventPublisher(publisher);
-        registration.interceptors(jwtChannelInterceptor, new SecurityContextChannelInterceptor(), authz);
+        registration.interceptors(new SecurityContextChannelInterceptor(), authz);
         registration.taskExecutor()
                 .corePoolSize(8)   // 기본 스레드 수
                 .maxPoolSize(20)   // 최대 스레드 수
