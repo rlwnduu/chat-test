@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.time.Instant;
 import java.util.Optional;
 
-public interface MessageRepository extends MongoRepository<Message, Long>, MessageRepositoryCustom{
+public interface MessageRepository extends MongoRepository<Message, Long>, MessageRepositoryCustom {
 
     // 특정 시간 이후에 생성된 메시지 개수 카운트
     long countByChannelIdAndCreatedAtAfter(Long channelId, Instant lastReadAt);

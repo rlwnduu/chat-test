@@ -2,33 +2,35 @@ package com.example.chat.channel.service;
 
 import com.example.chat.channel.domain.Channel;
 import com.example.chat.channel.domain.ChannelMember;
-import com.example.chat.channel.dto.*;
+import com.example.chat.channel.dto.ChannelCreateRequest;
+import com.example.chat.channel.dto.ChannelMemberResponse;
+import com.example.chat.channel.dto.ChannelSummaryProjection;
+import com.example.chat.channel.dto.ChannelSummaryResponse;
 import com.example.chat.channel.repository.ChannelMemberRepository;
 import com.example.chat.channel.repository.ChannelRepository;
 import com.example.chat.channel.util.ChannelMemberCursorMapper;
 import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.error.BusinessException;
 import com.example.chat.global.error.ErrorCode;
-import com.example.chat.invitation.repository.ChannelInviteRepository;
 import com.example.chat.message.repository.MessageRepository;
 import com.example.chat.user.domain.User;
 import com.example.chat.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class  ChannelService {
+public class ChannelService {
 
     private final ChannelRepository channelRepository;
 
@@ -109,7 +111,7 @@ public class  ChannelService {
     @Transactional
     public void markAsRead(Long channelId, Long userId, Long requestMessageId) {
         channelMemberRepository.updateLastReadMessageIdSafe(channelId, userId, requestMessageId);
-        
+
         // Redis 갱신 로직 제거 (DB 조회로 변경되었으므로 불필요)
     }
 

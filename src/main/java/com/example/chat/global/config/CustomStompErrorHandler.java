@@ -23,7 +23,7 @@ public class CustomStompErrorHandler extends StompSubProtocolErrorHandler {
         Throwable rootCause = ex.getCause() != null ? ex.getCause() : ex;
         log.error("🚨 STOMP Error Catch! Cause: {}", rootCause.getMessage());
 
-         log.error("Stack Trace:", ex);
+        log.error("Stack Trace:", ex);
 
         // 2. 클라이언트에게 보낼 오류 응답 메시지 생성
         return super.handleClientMessageProcessingError(clientMessage, ex);

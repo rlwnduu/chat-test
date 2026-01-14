@@ -3,7 +3,7 @@ package com.example.chat.global.interceptor;
 import com.example.chat.global.security.jwt.JwtTokenProvider;
 import com.example.chat.global.security.jwt.JwtTokenResolver;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j; // (1) Slf4j 로거 추가
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -19,7 +19,7 @@ import java.util.Map;
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
-     private final JwtTokenResolver jwtTokenResolver;
+    private final JwtTokenResolver jwtTokenResolver;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
@@ -35,13 +35,13 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         }
 
         token = jwtTokenResolver.removeBearerFix(token);
-            try {
-                String username = jwtTokenProvider.getUsername(token);
-                attributes.put("userPrincipal", username);
-                return true;
-            } catch (Exception e) {
-                log.warn("토큰 검증 또는 subject 추출 중 예외 발생: {}", e.getMessage());
-            }
+        try {
+            String username = jwtTokenProvider.getUsername(token);
+            attributes.put("userPrincipal", username);
+            return true;
+        } catch (Exception e) {
+            log.warn("토큰 검증 또는 subject 추출 중 예외 발생: {}", e.getMessage());
+        }
 
         response.setStatusCode(HttpStatus.UNAUTHORIZED); // 401 응답
         return false;

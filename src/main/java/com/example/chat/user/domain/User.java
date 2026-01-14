@@ -1,8 +1,8 @@
 package com.example.chat.user.domain;
 
 import com.example.chat.channel.domain.ChannelMember;
-import com.example.chat.user.dto.UserCreateRequest;
 import com.example.chat.global.util.id.SnowflakeId;
+import com.example.chat.user.dto.UserCreateRequest;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;

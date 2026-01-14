@@ -2,7 +2,6 @@ package com.example.chat.user.repository;
 
 import com.example.chat.user.domain.User;
 import com.example.chat.user.dto.UserInfoProjection;
-import com.example.chat.user.dto.UserInfoResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;

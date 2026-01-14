@@ -1,6 +1,8 @@
 package com.example.chat.channel.controller;
 
-import com.example.chat.channel.dto.*;
+import com.example.chat.channel.dto.ChannelCreateRequest;
+import com.example.chat.channel.dto.ChannelMemberResponse;
+import com.example.chat.channel.dto.ChannelSummaryResponse;
 import com.example.chat.channel.service.ChannelService;
 import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.security.user.CustomUserDetails;

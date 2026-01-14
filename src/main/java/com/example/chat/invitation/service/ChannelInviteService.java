@@ -2,14 +2,12 @@ package com.example.chat.invitation.service;
 
 import com.example.chat.channel.domain.Channel;
 import com.example.chat.channel.domain.ChannelMember;
-import com.example.chat.channel.dto.ChannelSummaryResponse;
+import com.example.chat.channel.repository.ChannelMemberRepository;
+import com.example.chat.channel.repository.ChannelRepository;
 import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.error.BusinessException;
 import com.example.chat.global.error.ErrorCode;
 import com.example.chat.invitation.domain.ChannelInvite;
-import com.example.chat.invitation.dto.ChannelInviteCursorResponse;
-import com.example.chat.channel.repository.ChannelMemberRepository;
-import com.example.chat.channel.repository.ChannelRepository;
 import com.example.chat.invitation.dto.ChannelInviteRequest;
 import com.example.chat.invitation.dto.ChannelInviteResponse;
 import com.example.chat.invitation.repository.ChannelInviteRepository;

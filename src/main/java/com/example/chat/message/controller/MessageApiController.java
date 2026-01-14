@@ -1,8 +1,8 @@
 package com.example.chat.message.controller;
 
+import com.example.chat.global.security.user.CustomUserDetails;
 import com.example.chat.message.dto.MessageLoadResponse;
 import com.example.chat.message.service.MessageService;
-import com.example.chat.global.security.user.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

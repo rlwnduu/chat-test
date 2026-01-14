@@ -65,7 +65,6 @@ public enum ErrorCode {
     UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, "MS003", "지원하지 않는 파일 형식입니다.");
 
 
-
 //    // E2EE (종단간 암호화) 관련
 //    PUBLIC_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "MS004", "상대방의 공개키를 찾을 수 없습니다."),
 //    DECRYPTION_FAILED(HttpStatus.BAD_REQUEST, "MS005", "메시지 복호화에 실패했습니다.");

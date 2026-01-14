@@ -1,22 +1,18 @@
 package com.example.chat.invitation.service;
 
-import com.example.chat.channel.service.ChannelService;
 import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.error.BusinessException;
 import com.example.chat.global.error.ErrorCode;
 import com.example.chat.invitation.domain.FriendRequest;
 import com.example.chat.invitation.domain.RequestStatus;
 import com.example.chat.invitation.dto.CreateFriendRequest;
-import com.example.chat.invitation.dto.FriendRequestCursorResponse;
 import com.example.chat.invitation.dto.FriendRequestResponse;
 import com.example.chat.invitation.repository.FriendRequestRepository;
 import com.example.chat.user.domain.User;
 import com.example.chat.user.domain.UserFriend;
 import com.example.chat.user.repository.UserFriendRepository;
 import com.example.chat.user.repository.UserRepository;
-import com.example.chat.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;

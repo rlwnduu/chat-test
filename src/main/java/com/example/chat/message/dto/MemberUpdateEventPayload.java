@@ -3,7 +3,7 @@ package com.example.chat.message.dto;
 import lombok.Getter;
 
 @Getter
-public class MemberUpdateEventPayload extends WebSocketPayload{
+public class MemberUpdateEventPayload extends WebSocketPayload {
 
     private int memberCount;
 

@@ -2,7 +2,6 @@ package com.example.chat.channel.repository;
 
 import com.example.chat.channel.domain.Channel;
 import com.example.chat.channel.dto.ChannelSummaryProjection;
-import com.example.chat.channel.dto.ChannelSummaryResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,7 +42,8 @@ public interface ChannelRepository extends JpaRepository<Channel, Long> {
             "JOIN cm.channel c " +
             "WHERE cm.user.id = :userId " +
             "  AND (:cursorId IS NULL OR cm.lastMessageId < :cursorId) " + // [변경] 커서 조건도 cm 기준
-            "ORDER BY cm.lastMessageId DESC") // [핵심] 정렬 기준 변경
+            "ORDER BY cm.lastMessageId DESC")
+        // [핵심] 정렬 기준 변경
     Slice<ChannelSummaryProjection> findChannelProjectionsByUserId(
             @Param("userId") Long userId,
             @Param("cursorId") Long cursorId,

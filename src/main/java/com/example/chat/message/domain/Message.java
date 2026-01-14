@@ -1,7 +1,6 @@
 package com.example.chat.message.domain;
 
 import com.example.chat.global.util.id.SnowflakeId;
-
 import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;

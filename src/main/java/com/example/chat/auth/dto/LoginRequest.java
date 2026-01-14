@@ -1,7 +1,6 @@
 package com.example.chat.auth.dto;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 public class LoginRequest {

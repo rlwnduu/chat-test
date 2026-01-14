@@ -1,10 +1,10 @@
 package com.example.chat.message.controller;
 
 import com.example.chat.channel.service.ChannelService;
+import com.example.chat.global.security.user.CustomUserDetails;
 import com.example.chat.message.dto.MessageCreateRequest;
 import com.example.chat.message.dto.MessageReadRequest;
 import com.example.chat.message.service.ChatService;
-import com.example.chat.global.security.user.CustomUserDetails;
 import com.example.chat.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

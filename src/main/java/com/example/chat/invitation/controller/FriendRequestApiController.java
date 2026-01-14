@@ -1,9 +1,10 @@
 package com.example.chat.invitation.controller;
 
 import com.example.chat.global.dto.PageResponse;
-import com.example.chat.invitation.dto.*;
-import com.example.chat.invitation.service.FriendRequestService;
 import com.example.chat.global.security.user.CustomUserDetails;
+import com.example.chat.invitation.dto.CreateFriendRequest;
+import com.example.chat.invitation.dto.FriendRequestResponse;
+import com.example.chat.invitation.service.FriendRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

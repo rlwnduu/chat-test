@@ -28,5 +28,6 @@ public class ChannelMemberCursorMapper {
         }
     }
 
-    public record CursorData(String nickname, Long id) {}
+    public record CursorData(String nickname, Long id) {
+    }
 }

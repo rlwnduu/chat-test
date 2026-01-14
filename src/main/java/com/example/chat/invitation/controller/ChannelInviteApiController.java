@@ -1,12 +1,10 @@
 package com.example.chat.invitation.controller;
 
 import com.example.chat.global.dto.PageResponse;
-import com.example.chat.invitation.dto.ChannelInviteCursorResponse;
+import com.example.chat.global.security.user.CustomUserDetails;
 import com.example.chat.invitation.dto.ChannelInviteRequest;
 import com.example.chat.invitation.dto.ChannelInviteResponse;
-import com.example.chat.channel.dto.ChannelSummaryResponse;
 import com.example.chat.invitation.service.ChannelInviteService;
-import com.example.chat.global.security.user.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

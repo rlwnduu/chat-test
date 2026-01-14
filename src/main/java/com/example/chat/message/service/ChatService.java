@@ -1,8 +1,8 @@
 package com.example.chat.message.service;
 
 import com.example.chat.message.dto.MemberUpdateEventPayload;
-import com.example.chat.message.dto.MessageEventPayload;
 import com.example.chat.message.dto.MessageCreateRequest;
+import com.example.chat.message.dto.MessageEventPayload;
 import com.example.chat.message.event.MessageSentEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
