@@ -5,16 +5,19 @@ import com.example.chat.global.error.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * @deprecated 세션 기반 인증으로 전환됨에 따라 더 이상 사용되지 않습니다.
+ * 추후 모바일 앱 등에서 JWT가 다시 필요해질 경우를 대비해 코드는 유지합니다.
+ */
+@Deprecated
 @Slf4j
 @Component
 public class JwtTokenProvider {

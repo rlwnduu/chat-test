@@ -7,6 +7,10 @@ import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
+/**
+ * @deprecated 세션 기반 인증으로 전환됨에 따라 더 이상 사용되지 않습니다.
+ */
+@Deprecated
 @Component
 public class JwtTokenResolver {
 

@@ -17,6 +17,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * @deprecated 세션 기반 인증으로 전환됨에 따라 더 이상 사용되지 않습니다.
+ * SecurityConfig에서 필터 등록이 해제되었습니다.
+ */
+@Deprecated
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {

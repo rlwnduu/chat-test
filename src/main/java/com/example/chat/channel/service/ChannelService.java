@@ -9,7 +9,6 @@ import com.example.chat.channel.util.ChannelMemberCursorMapper;
 import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.error.BusinessException;
 import com.example.chat.global.error.ErrorCode;
-import com.example.chat.global.redis.RedisService;
 import com.example.chat.invitation.repository.ChannelInviteRepository;
 import com.example.chat.message.repository.MessageRepository;
 import com.example.chat.user.domain.User;

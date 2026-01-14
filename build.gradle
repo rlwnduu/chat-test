@@ -34,7 +34,12 @@ dependencies {
     implementation 'org.springframework.security:spring-security-messaging'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator' // Actuator 추가
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    implementation 'org.springframework.session:spring-session-data-redis'
+
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
     // QueryDSL 구현체
@@ -51,14 +56,8 @@ dependencies {
 
     implementation 'org.apache.commons:commons-lang3:3.13.0'
 
-    // JWT
+    // JWT (Deprecated 예정)
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
-
-    // [추가] 액추에이터 (스프링 상태 모니터링 기능)
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
-    // [추가] 프로메테우스와 연동하기 위한 변환기
-    implementation 'io.micrometer:micrometer-registry-prometheus'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
