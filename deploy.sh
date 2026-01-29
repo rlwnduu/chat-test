@@ -6,11 +6,15 @@ echo "🚀 배포를 시작합니다..."
 echo "📥 Git Pull..."
 git pull
 
-# 2. Docker 이미지 빌드 및 컨테이너 실행 (운영 모드)
+# [추가] 2. Gradle 빌드 (jar 파일 생성)
+echo "🛠️  Gradle Build..."
+./gradlew build -x test # test는 생략하고 빌드
+
+# 3. Docker 이미지 빌드 및 컨테이너 실행 (운영 모드)
 echo "🐳 Docker Compose Up (Prod)..."
 docker-compose -f docker-compose.prod.yml up --build -d
 
-# 3. 불필요한 이미지 정리 (공간 확보)
+# 4. 불필요한 이미지 정리 (공간 확보)
 echo "🧹 Pruning unused images..."
 docker image prune -f
 

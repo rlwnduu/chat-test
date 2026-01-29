@@ -1,0 +1,78 @@
+version: '3.8'
+
+# 서버 2 (Worker Node) 전용 설정
+# DB, Redis 없이 App과 Nginx만 실행합니다.
+
+services:
+  # 1. Spring Boot App 1 (Worker)
+  chat-app-1:
+    build: .
+    image: my-chat-app:latest
+    container_name: chat-app-1
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SNOWFLAKE_NODE_ID=3 # 서버 1과 겹치지 않는 ID
+      
+      # [중요] 서버 1의 Private IP를 바라보도록 설정
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${MAIN_SERVER_IP}:3306/chat?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      
+      - SPRING_DATA_REDIS_HOST=${MAIN_SERVER_IP}
+      - SPRING_DATA_REDIS_PORT=6379
+      
+      - SPRING_DATA_MONGODB_HOST=${MAIN_SERVER_IP}
+      - SPRING_DATA_MONGODB_PORT=27017
+      
+    volumes:
+      - ./logs:/app/logs # 로그 파일 공유
+    networks:
+      - chat-net
+
+  # 2. Spring Boot App 2 (Worker)
+  chat-app-2:
+    image: my-chat-app:latest
+    container_name: chat-app-2
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SNOWFLAKE_NODE_ID=4 # 겹치지 않는 ID
+      
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${MAIN_SERVER_IP}:3306/chat?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      
+      - SPRING_DATA_REDIS_HOST=${MAIN_SERVER_IP}
+      - SPRING_DATA_REDIS_PORT=6379
+      
+      - SPRING_DATA_MONGODB_HOST=${MAIN_SERVER_IP}
+      - SPRING_DATA_MONGODB_PORT=27017
+      
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - chat-net
+
+  # 3. Nginx (Worker Node용)
+  nginx:
+    image: nginx:latest
+    container_name: chat-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - chat-app-1
+      - chat-app-2
+    networks:
+      - chat-net
+
+networks:
+  chat-net:
+    driver: bridge
