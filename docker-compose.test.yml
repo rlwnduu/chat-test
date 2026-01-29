@@ -1,11 +1,26 @@
 version: '3.8'
 
 services:
-  my-chat-app:
-    # 기존 설정(이미지, 포트, 볼륨 등)은 docker-compose.yml에서 상속받음
-    # 여기서는 성능 제한만 덮어씌움 (Override)
+  # [서버 1] OCL 인스턴스 A 시뮬레이션
+  chat-app-1:
     deploy:
       resources:
         limits:
-          cpus: '1.0'        # CPU 1개로 제한
-          memory: 1G         # 메모리 1GB로 제한 (EC2 t2.micro 급)
+          cpus: '1.0'
+          memory: 1G
+
+  # [서버 2] OCL 인스턴스 B 시뮬레이션
+  chat-app-2:
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+
+  # [로드 밸런서] OCL Load Balancer 시뮬레이션
+  nginx:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M

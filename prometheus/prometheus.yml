@@ -5,5 +5,5 @@ scrape_configs:
   - job_name: 'my-chat-app'
     metrics_path: '/actuator/prometheus' # 스프링 부트가 열어둔 뒷문 경로
     static_configs:
-      # [중요] 도커 컨테이너 이름:포트
-      - targets: ['my-chat-app:8080']
+      # [변경] 분산 서버들의 주소를 모두 적어줍니다.
+      - targets: ['chat-app-1:8080', 'chat-app-2:8080']

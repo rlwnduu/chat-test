@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # 1. Redis
+  redis:
+    image: redis:alpine
+    container_name: chat-redis
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - chat-net
+
+  # 2. MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: chat-mongo
+    restart: always
+    volumes:
+      - ./data/mongo:/data/db
+    networks:
+      - chat-net
+
+  # 3. MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: chat-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: chat
+      TZ: Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    networks:
+      - chat-net
+
+  # 4. Spring Boot App 1 (Node ID: 1)
+  chat-app-1:
+    build: .
+    image: my-chat-app:latest
+    container_name: chat-app-1
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+      - mongodb
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      # [수정] Snowflake Node ID 설정 (1번)
+      - SNOWFLAKE_NODE_ID=1
+      
+      - SPRING_DATASOURCE_URL=jdbc:mysql://chat-mysql:3306/chat?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATA_REDIS_HOST=chat-redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_MONGODB_HOST=chat-mongo
+      - SPRING_DATA_MONGODB_PORT=27017
+    networks:
+      - chat-net
+
+  # 5. Spring Boot App 2 (Node ID: 2)
+  chat-app-2:
+    image: my-chat-app:latest
+    container_name: chat-app-2
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+      - mongodb
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      # [수정] Snowflake Node ID 설정 (2번)
+      - SNOWFLAKE_NODE_ID=2
+      
+      - SPRING_DATASOURCE_URL=jdbc:mysql://chat-mysql:3306/chat?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATA_REDIS_HOST=chat-redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_MONGODB_HOST=chat-mongo
+      - SPRING_DATA_MONGODB_PORT=27017
+    networks:
+      - chat-net
+
+  # 6. Nginx
+  nginx:
+    image: nginx:latest
+    container_name: chat-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - chat-app-1
+      - chat-app-2
+    networks:
+      - chat-net
+
+networks:
+  chat-net:
+    driver: bridge

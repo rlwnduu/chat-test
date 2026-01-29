@@ -1,0 +1,36 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  session:
+    store-type: redis
+    redis:
+      namespace: spring:session
+      flush-mode: on_save
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        default_batch_fetch_size: 100
+        enable_lazy_load_no_trans: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    url: ${SPRING_DATASOURCE_URL}
+    user: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+
+logging:
+  level:
+    root: INFO
+    com.example.chat: INFO
+    org.springframework.boot: INFO

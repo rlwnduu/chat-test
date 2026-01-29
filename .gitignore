@@ -50,7 +50,6 @@ logs/
 ### Sensitive Information & Configuration ###
 .env
 /my-key.pem
-application-prod.yml
 application-dev.yml
 application-secret.yml
 secrets/
@@ -62,3 +61,9 @@ docker-compose.override.yml
 ### Local Database Data ###
 data/
 grafana-data/
+/ssh-key-2026-01-29.key
+/ssh-key-2026-01-29.key.pub
+/ssh-key-2026-01-29.key (1).pub
+/ssh-key-2026-01-29 (1).key
+/ssh-key-2026-01-29.key2.pub
+/ssh-key-2026-01-29_2.key

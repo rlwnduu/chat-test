@@ -2,34 +2,39 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
+    <!-- 로그 파일 저장 경로 -->
     <property name="LOG_PATH" value="./logs"/>
 
+    <!-- [1] 콘솔 출력 패턴 (색상 적용) -->
     <property name="CONSOLE_LOG_PATTERN"
-              value="%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr([%thread]){magenta} %clr([%X{traceId:-} %X{userId:-} %X{sessionId:-}]){cyan} %clr(%logger{36}){blue} - %msg%n"/>
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%-5level) %clr([%thread]){magenta} %clr(%logger{36}){blue} - %msg%n"/>
 
+    <!-- [2] 파일 출력 패턴 (깔끔하게) -->
     <property name="FILE_LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:-} %X{userId:-} %X{sessionId:-}] %-5level %logger{36} - %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
 
+    <!-- Appender: 콘솔 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
+    <!-- Appender: 파일 (INFO 레벨 이상 전체) -->
     <appender name="FILE_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/app-info.log</file>
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
-        </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_PATH}/backup/info/app-info-%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory>
+            <maxHistory>30</maxHistory> <!-- 30일 보관 -->
         </rollingPolicy>
         <encoder>
             <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
+    <!-- Appender: 파일 (ERROR 레벨만 따로 저장) -->
     <appender name="FILE_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/app-error.log</file>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
@@ -39,26 +44,38 @@
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_PATH}/backup/error/app-error-%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>60</maxHistory>
+            <maxHistory>60</maxHistory> <!-- 60일 보관 -->
         </rollingPolicy>
         <encoder>
             <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
+    <!-- ====================================================== -->
+    <!-- 프로필별 적용 (핵심) -->
+    <!-- ====================================================== -->
+
+    <!-- [개발 환경] local -->
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <!-- 내 코드 디버깅 -->
+        <logger name="com.example.chat" level="DEBUG"/>
+        <!-- SQL 쿼리 보기 (필요할 때 주석 해제) -->
+        <logger name="org.hibernate.SQL" level="DEBUG"/>
+        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
+    </springProfile>
+
+    <!-- [운영 환경] prod -->
     <springProfile name="prod">
         <root level="INFO">
             <appender-ref ref="FILE_INFO"/>
             <appender-ref ref="FILE_ERROR"/>
         </root>
+        <!-- 운영에서는 내 코드도 INFO 레벨만 -->
         <logger name="com.example.chat" level="INFO"/>
-    </springProfile>
-
-    <springProfile name="!prod">
-        <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
-        </root>
-        <logger name="com.example.chat" level="DEBUG"/>
     </springProfile>
 
 </configuration>

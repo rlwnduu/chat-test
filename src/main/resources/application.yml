@@ -5,20 +5,20 @@ spring:
   profiles:
     active: local
   
-  # [추가] 세션 저장소 설정
   session:
-    store-type: redis # 세션을 Redis에 저장
+    store-type: redis
     redis:
-      namespace: spring:session # Redis 키 접두사 (기본값)
-      flush-mode: on_save # 응답이 나갈 때 Redis에 저장 (성능 최적화)
+      namespace: spring:session
+      flush-mode: on_save
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
     mongodb:
-      host: localhost
-      port: 27016
+      host: ${SPRING_DATA_MONGODB_HOST:localhost}
+      port: ${SPRING_DATA_MONGODB_PORT:27016}
       database: chat
   datasource:
     hikari:
@@ -26,16 +26,21 @@ spring:
       maximum-pool-size: 15
       minimum-idle: 15
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3307/chat?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://${SPRING_DATASOURCE_HOST:localhost}:${SPRING_DATASOURCE_PORT:3307}/chat?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
     password: ${DB_PASSWORD:1234}
 
+  # DDL 추출을 위해 Flyway를 끄고, ddl-auto를 create로 변경
+  flyway:
+    enabled: false
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: create # create로 변경
+    show-sql: true # jpa 하위가 아닌 spring.jpa의 속성으로 변경
     properties:
       hibernate:
+        format_sql: true
         enable_lazy_load_no_trans: true
         default_batch_fetch_size: 10
 
@@ -49,21 +54,15 @@ management:
   endpoints:
     web:
       exposure:
-        include: prometheus, health, info, metrics # metrics 추가
+        include: prometheus, health, info, metrics
   metrics:
     enable:
-      hikaricp: true # HikariCP 지표 활성화
+      hikaricp: true
   endpoint:
     prometheus:
       enabled: true
 
-#logging:
-#  level:
-#    # [핵심] STOMP 메시지 처리 과정과 내부 에러를 보여줍니다.
-#    org.springframework.messaging: DEBUG
-#
-#    # (선택) 웹소켓 연결(Handshake) 자체의 문제를 볼 때 필요합니다.
-#    org.springframework.web.socket: DEBUG
-#
-#    # (선택) 시큐리티 관련(JWT 등) 채널 차단 로그를 볼 때 필요합니다.
-#    org.springframework.security.messaging: DEBUG
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

@@ -70,31 +70,61 @@ services:
     volumes:
       - ./grafana-data:/var/lib/grafana
 
-  my-chat-app:
+  # [변경] 분산 환경 테스트를 위한 서버 1
+  chat-app-1:
     build: .
     image: my-chat-app:latest
-    container_name: my-chat-app
+    container_name: my-chat-app-1
     depends_on:
-      - prometheus # [변경] scouter 대신 prometheus
+      - prometheus
       - mysql
+      - redis
     ports:
-      - "8080:8080"
+      - "8081:8080" # 외부 포트 8081 -> 내부 8080
     volumes:
       - ./scouter-agent:/app/scouter-agent
-
-    # [추가] .env 파일의 모든 변수를 컨테이너로 주입합니다.
     env_file:
       - .env
-
     environment:
-      # 1. MySQL 접속 정보 (컨테이너 이름 chat-mysql 사용)
       - SPRING_DATASOURCE_URL=jdbc:mysql://chat-mysql:3306/chat?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD} # .env에서 비번 가져옴
-
-      # 2. Redis 접속 정보 (컨테이너 이름 chat-redis 사용)
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_DATA_REDIS_HOST=chat-redis
       - SPRING_DATA_REDIS_PORT=6379
-
-      # 3. MongoDB 접속 정보 (컨테이너 이름 chat-mongo 사용)
       - SPRING_DATA_MONGODB_URI=mongodb://chat-mongo:27017/chat
+
+  # [추가] 분산 환경 테스트를 위한 서버 2
+  chat-app-2:
+    build: .
+    image: my-chat-app:latest
+    container_name: my-chat-app-2
+    depends_on:
+      - prometheus
+      - mysql
+      - redis
+    ports:
+      - "8082:8080" # 외부 포트 8082 -> 내부 8080
+    volumes:
+      - ./scouter-agent:/app/scouter-agent
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://chat-mysql:3306/chat?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATA_REDIS_HOST=chat-redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_MONGODB_URI=mongodb://chat-mongo:27017/chat
+
+  # [추가] 로드 밸런서 (Nginx)
+  nginx:
+    image: nginx:latest
+    container_name: chat-load-balancer
+    ports:
+      - "8080:80" # 사용자는 8080 포트로 접속 -> Nginx 내부 80 -> chat-app-1/2로 분산
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf # 설정 파일 마운트
+    depends_on:
+      - chat-app-1
+      - chat-app-2
+    restart: always

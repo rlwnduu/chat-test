@@ -1,63 +1,51 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
 export const options = {
   stages: [
-    { duration: '10s', target: 150 }, // 50명까지 증가
-    { duration: '1m', target: 150 },  // 1분간 유지
+    { duration: '10s', target: 50 }, // 50명까지 증가 (테스트용으로 50명으로 조정)
+    { duration: '1m', target: 50 },  // 1분간 유지
     { duration: '10s', target: 0 },  // 종료
   ],
 };
 
 const BASE_URL = 'http://localhost:8080';
 
-// [Setup] 테스트 시작 전 50명 미리 로그인 -> 토큰 발급
-export function setup() {
-  const tokens = [];
-  for (let i = 1; i <= 150; i++) {
-    const payload = JSON.stringify({
-      loginId: `test${i}`,
-      password: 'test',
-    });
+export default function () {
+  const idSequence = __VU;
+  const loginId = `test${idSequence}`; // user1, user2 ...
+  const password = 'test';
 
-    const res = http.post(`${BASE_URL}/api/auth/login`, payload, {
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (res.status === 200) {
-      tokens.push(res.json('accessToken'));
-    } else {
-      console.error(`Setup login failed for test${i}: ${res.status}`);
-    }
-  }
-  return tokens;
-}
-
-export default function (tokens) {
-  // 토큰이 없으면 중단
-  if (!tokens || tokens.length === 0) return;
-
-  // 각 VU에게 토큰 분배
-  const myToken = tokens[(__VU - 1) % tokens.length];
-
-  const authHeaders = {
-    headers: {
-      'Authorization': `Bearer ${myToken}`,
-      'Content-Type': 'application/json',
-    },
+  // 2. 로그인 시도 (Form Data 전송)
+  // K6의 http.post는 두 번째 인자가 객체일 경우 자동으로 x-www-form-urlencoded로 변환하여 전송합니다.
+  const loginPayload = {
+    loginId: loginId,
+    password: password,
   };
 
-  // 1. 채널 목록 조회 (MySQL)
-  const channelsRes = http.get(`${BASE_URL}/api/channels`, authHeaders);
+  const loginRes = http.post(`${BASE_URL}/api/auth/login`, loginPayload);
+
+  const isLoginSuccess = check(loginRes, {
+    'Login success': (r) => r.status === 200,
+  });
+
+  if (!isLoginSuccess) {
+    console.error(`Login failed for ${userId}: ${loginRes.status}`);
+    sleep(1);
+    return; // 로그인 실패 시 이번 반복 중단
+  }
+
+  // 2. 채널 목록 조회 (자동으로 SESSION 쿠키가 포함됨)
+  const channelsRes = http.get(`${BASE_URL}/api/channels`);
   check(channelsRes, { 'Get Channels 200': (r) => r.status === 200 });
 
-  // 2. 첫 번째 채널의 메시지 조회 (MongoDB)
-  // (채널이 하나도 없으면 에러 날 수 있으니 체크)
+  // 3. 첫 번째 채널의 메시지 조회 (MongoDB)
   try {
       const channels = channelsRes.json();
       if (channels && channels.length > 0) {
         const channelId = channels[0].channelId;
-        const msgRes = http.get(`${BASE_URL}/api/messages?channelId=${channelId}`, authHeaders);
+        const msgRes = http.get(`${BASE_URL}/api/messages?channelId=${channelId}`);
         check(msgRes, { 'Get Messages 200': (r) => r.status === 200 });
       }
   } catch (e) {
