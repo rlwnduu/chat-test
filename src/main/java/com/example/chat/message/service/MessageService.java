@@ -1,7 +1,6 @@
 package com.example.chat.message.service;
 
 import com.example.chat.channel.repository.ChannelMemberRepository;
-import com.example.chat.channel.repository.ChannelRepository;
 import com.example.chat.channel.service.ChannelService;
 import com.example.chat.global.error.BusinessException;
 import com.example.chat.global.error.ErrorCode;
@@ -36,7 +35,6 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
     private final ChannelService channelService;
-    private final ChannelRepository channelRepository;
     private final ChannelMemberRepository channelMemberRepository;
     private final UserRepository userRepository;
 
