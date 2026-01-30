@@ -21,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,8 +39,6 @@ public class MessageService {
     private final ChannelRepository channelRepository;
     private final ChannelMemberRepository channelMemberRepository;
     private final UserRepository userRepository;
-
-    private final MongoTemplate mongoTemplate;
 
     @Transactional
     public MessageEventPayload createAndSaveMessage(Long channelId, Long authorId, MessageCreateRequest sendMessageDto) {
@@ -75,7 +72,7 @@ public class MessageService {
 
         List<MessageView> messages = messageSlice.getContent();
         boolean hasNext = messageSlice.hasNext();
-        String nextCursor = hasNext ? messages.get(0).getMessageId() : null;
+        String nextCursor = (hasNext && !messages.isEmpty()) ? messages.get(messages.size() - 1).getMessageId() : null;
 
         Set<String> authorIds = messages.stream()
                 .map(MessageView::getAuthorId)
