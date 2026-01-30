@@ -856,6 +856,20 @@
         }
 
         // --- Messages Logic ---
+        function getDateSeparatorHtml(isoString) {
+            const dateStr = new Date(isoString).toLocaleDateString("ko-KR", {year:"numeric", month:"long", day:"numeric"});
+            const yyyymmdd = getYYYYMMDD(isoString);
+            return `<div class="flex items-center my-4 px-2" data-date-separator="${yyyymmdd}"><hr class="flex-grow border-t border-gray-600"><span class="px-3 text-xs font-medium text-gray-400 bg-gray-700 rounded-full py-0.5">${dateStr}</span><hr class="flex-grow border-t border-gray-600"></div>`;
+        }
+
+        function getMessageHtml(msg) {
+            const author = msg.author || userProfileCache.get(msg.authorId);
+            if(!author) return "";
+            const time = new Date(msg.createdAt).toLocaleTimeString("ko-KR", {hour:"2-digit",minute:"2-digit",hour12:false});
+            const profileHtml = getProfileHtml(author.profileImageUrl, author.nickname, author.profileIconColor, "w-9 h-9");
+            return `<div class="flex items-start gap-3 hover:bg-black/10 p-1 rounded -mx-1" data-timestamp="${msg.createdAt}">${profileHtml}<div class="flex-1 min-w-0"><div class="flex items-baseline gap-2"><span class="font-bold text-gray-200 text-sm hover:underline cursor-pointer">${author.nickname}</span><span class="text-[10px] text-gray-500">${time}</span></div><div class="whitespace-pre-wrap break-words text-gray-300 text-sm mt-0.5 leading-relaxed">${msg.content.trim()}</div></div></div>`;
+        }
+
         async function loadMessages(channelId, isInitial) {
             if (isLoadingMessages || (!isInitial && !messageHasNextPage)) return;
             isLoadingMessages = true;
@@ -879,34 +893,58 @@
                 sendMarkAsRead(channelId, latestMessageId);
             }
 
-            let batchDate = isInitial ? lastRenderedDate : null;
+            // Snowflake ID는 시간순 정렬이 보장되므로, ID 기준 DESC(최신순) 데이터를
+            // ASC(과거->최신)로 뒤집어서 렌더링 순서를 맞춥니다.
+            msgs.reverse();
 
-            // 주의: reverse()는 원본 배열을 변형하므로, 위에서 index 0을 접근한 후 reverse해야 함
-            msgs.reverse().forEach(m => {
-                const d = getYYYYMMDD(m.createdAt);
-                if(d !== batchDate) { renderDateSeparator(m.createdAt, !isInitial); batchDate = d; }
-                renderMessage(m, !isInitial);
-            });
-            if(isInitial && msgs.length>0) lastRenderedDate = batchDate;
-            if(isInitial) messageListContainer.scrollTop = messageListContainer.scrollHeight;
-            else messageListContainer.scrollTop = messageListContainer.scrollHeight - oldScroll;
+            if (isInitial) {
+                // [초기 로딩] 아래로 추가 (Append)
+                msgs.forEach(m => {
+                    const d = getYYYYMMDD(m.createdAt);
+                    if(d !== lastRenderedDate) {
+                        renderDateSeparator(m.createdAt, false);
+                        lastRenderedDate = d;
+                    }
+                    renderMessage(m, false);
+                });
+                messageListContainer.scrollTop = messageListContainer.scrollHeight;
+            } else {
+                // [과거 메시지 로딩] 위로 추가 (Prepend)
+                // 배치 단위로 HTML을 생성하여 한 번에 삽입해야 순서(ASC)가 유지됩니다.
+                let htmlBuffer = "";
+                let batchLastDate = null;
+
+                msgs.forEach((m, idx) => {
+                    const mDate = getYYYYMMDD(m.createdAt);
+                    
+                    // 배치의 첫 메시지거나 날짜가 변경된 경우 구분선 추가
+                    if (idx === 0 || mDate !== batchLastDate) {
+                        // 이미 DOM에 해당 날짜의 구분선이 있다면(더 아래쪽에), 
+                        // 현재 로딩한 메시지가 더 과거이므로 기존 구분선을 제거하고 위쪽에 새로 만듭니다.
+                        const existingSep = messageList.querySelector(`div[data-date-separator="${mDate}"]`);
+                        if (existingSep) existingSep.remove();
+
+                        htmlBuffer += getDateSeparatorHtml(m.createdAt);
+                        batchLastDate = mDate;
+                    }
+                    htmlBuffer += getMessageHtml(m);
+                });
+
+                messageList.insertAdjacentHTML("afterbegin", htmlBuffer);
+                messageListContainer.scrollTop = messageListContainer.scrollHeight - oldScroll;
+            }
         }
 
         function renderDateSeparator(isoString, prepend=false) {
-            const dateStr = new Date(isoString).toLocaleDateString("ko-KR", {year:"numeric", month:"long", day:"numeric"});
             const yyyymmdd = getYYYYMMDD(isoString);
             if (messageList.querySelector(`div[data-date-separator="${yyyymmdd}"]`)) return;
-            const html = `<div class="flex items-center my-4 px-2" data-date-separator="${yyyymmdd}"><hr class="flex-grow border-t border-gray-600"><span class="px-3 text-xs font-medium text-gray-400 bg-gray-700 rounded-full py-0.5">${dateStr}</span><hr class="flex-grow border-t border-gray-600"></div>`;
+            const html = getDateSeparatorHtml(isoString);
             prepend ? messageList.insertAdjacentHTML("afterbegin", html) : messageList.insertAdjacentHTML("beforeend", html);
         }
 
         function renderMessage(msg, prepend) {
-            const author = msg.author || userProfileCache.get(msg.authorId);
-            if(!author) return;
-            const time = new Date(msg.createdAt).toLocaleTimeString("ko-KR", {hour:"2-digit",minute:"2-digit",hour12:false});
-            const profileHtml = getProfileHtml(author.profileImageUrl, author.nickname, author.profileIconColor, "w-9 h-9");
-            const html = `<div class="flex items-start gap-3 hover:bg-black/10 p-1 rounded -mx-1" data-timestamp="${msg.createdAt}">${profileHtml}<div class="flex-1 min-w-0"><div class="flex items-baseline gap-2"><span class="font-bold text-gray-200 text-sm hover:underline cursor-pointer">${author.nickname}</span><span class="text-[10px] text-gray-500">${time}</span></div><div class="whitespace-pre-wrap break-words text-gray-300 text-sm mt-0.5 leading-relaxed">${msg.content.trim()}</div></div></div>`;
-            prepend ? messageList.insertAdjacentHTML("afterbegin", html) : messageList.insertAdjacentHTML("beforeend", html);
+            const html = getMessageHtml(msg);
+            if(html) prepend ? messageList.insertAdjacentHTML("afterbegin", html) : messageList.insertAdjacentHTML("beforeend", html);
         }
 
         function sendMessage() {
