@@ -1,3 +1,13 @@
-/gradlew text eol=lf
+# 모든 텍스트 파일의 줄바꿈을 LF로 통일 (Windows에서도 LF 사용 강제)
+* text=auto eol=lf
+
+# 윈도우 배치 파일만 CRLF 유지
 *.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 바이너리 파일은 줄바꿈 변환 제외
 *.jar binary
+*.png binary
+*.jpg binary
+*.gif binary
+/gradlew text eol=lf
