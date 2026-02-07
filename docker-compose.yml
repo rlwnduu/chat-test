@@ -15,116 +15,29 @@ services:
     ports:
       - "27016:27017"
     volumes:
-      - ./data/mongo:/data/db
+      - mongo_data:/data/db
     command:
-      - --profile=1       # 느린 쿼리만 기록 (Level 1)
-      - --slowms=100      # 100ms(0.1초) 이상 걸리면 기록
+      - --profile=1
+      - --slowms=100
 
   mysql:
     image: mysql:8.0
     container_name: chat-mysql
     restart: always
     environment:
-      # [변경] .env 파일의 DB_PASSWORD 값을 가져옵니다.
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: chat
       TZ: Asia/Seoul
     ports:
       - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
-      - --slow_query_log=1                # 1. 슬로우 쿼리 로그 켜기 (ON)
-      - --long_query_time=2               # 2. '2초' 이상 걸리면 기록 (원하는 시간 설정)
-      - --slow_query_log_file=/var/lib/mysql/slow.log # 3. 저장할 파일 위치
-    volumes:
-      - ./data/mysql:/var/lib/mysql
+      - --slow_query_log=1
+      - --long_query_time=2
 
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: chat-prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      # 아까 만든 설정 파일을 컨테이너 안으로 넣어줍니다.
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      # [추가] 수집한 데이터를 내 컴퓨터에 저장 (과거 기록 보존)
-      - ./prometheus-data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    restart: always
-
-  # [추가] 그라파나 (대시보드 뷰어)
-  grafana:
-    image: grafana/grafana:latest
-    container_name: chat-grafana
-    ports:
-      - "3000:3000" # 접속 포트
-    environment:
-      # 로그인 없이 바로 보고 싶다면 설정 (보안상 비추천하지만 개발용으론 편함)
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      # [추가] 2. 익명 사용자의 권한을 'Admin'으로 격상 (이게 핵심!)
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-    #     - GF_SECURITY_ADMIN_PASSWORD=admin # 초기 비번 설정
-    restart: always
-    volumes:
-      - ./grafana-data:/var/lib/grafana
-
-  # [변경] 분산 환경 테스트를 위한 서버 1
-  chat-app-1:
-    build: .
-    image: my-chat-app:latest
-    container_name: my-chat-app-1
-    depends_on:
-      - prometheus
-      - mysql
-      - redis
-    ports:
-      - "8081:8080" # 외부 포트 8081 -> 내부 8080
-    volumes:
-      - ./scouter-agent:/app/scouter-agent
-    env_file:
-      - .env
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://chat-mysql:3306/chat?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - SPRING_DATA_REDIS_HOST=chat-redis
-      - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_MONGODB_URI=mongodb://chat-mongo:27017/chat
-
-  # [추가] 분산 환경 테스트를 위한 서버 2
-  chat-app-2:
-    build: .
-    image: my-chat-app:latest
-    container_name: my-chat-app-2
-    depends_on:
-      - prometheus
-      - mysql
-      - redis
-    ports:
-      - "8082:8080" # 외부 포트 8082 -> 내부 8080
-    volumes:
-      - ./scouter-agent:/app/scouter-agent
-    env_file:
-      - .env
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://chat-mysql:3306/chat?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - SPRING_DATA_REDIS_HOST=chat-redis
-      - SPRING_DATA_REDIS_PORT=6379
-      - SPRING_DATA_MONGODB_URI=mongodb://chat-mongo:27017/chat
-
-  # [추가] 로드 밸런서 (Nginx)
-  nginx:
-    image: nginx:latest
-    container_name: chat-load-balancer
-    ports:
-      - "8080:80" # 사용자는 8080 포트로 접속 -> Nginx 내부 80 -> chat-app-1/2로 분산
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf # 설정 파일 마운트
-    depends_on:
-      - chat-app-1
-      - chat-app-2
-    restart: always
+volumes:
+  db_data:
+  mongo_data:
