@@ -9,6 +9,8 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class MessageCreateRequest {
+public class MessageSaveRequest {
+    private Long channelId;
+    private Long authorId;
     private String content;
 }
