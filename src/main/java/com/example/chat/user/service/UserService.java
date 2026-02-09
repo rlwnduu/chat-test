@@ -1,12 +1,13 @@
 package com.example.chat.user.service;
 
+import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.error.BusinessException;
 import com.example.chat.global.error.ErrorCode;
 import com.example.chat.user.domain.ProfileColor;
 import com.example.chat.user.domain.User;
 import com.example.chat.user.dto.UserCreateRequest;
-import com.example.chat.user.dto.UserCursorResponse;
 import com.example.chat.user.dto.UserInfoProjection;
+import com.example.chat.user.dto.UserInfoResponse;
 import com.example.chat.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +63,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserCursorResponse getMyFriends(Long userId, String cursor, int size) {
+    public PageResponse<UserInfoResponse> getMyFriends(Long userId, String cursor, int size) {
         Long longCursor = null;
         try {
             longCursor = cursor != null ? Long.parseLong(cursor) : null;
@@ -73,15 +74,17 @@ public class UserService {
         PageRequest pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
         Slice<UserInfoProjection> slice = userRepository.findFriendsByUserIdWithCursor(userId, longCursor, pageable);
 
-        List<UserInfoProjection> friends = slice.getContent();
+        List<UserInfoResponse> friends = slice.getContent().stream()
+                .map(UserInfoResponse::new)
+                .toList();
         boolean hasNext = slice.hasNext();
         String nextCursor = null;
 
         if (hasNext && !friends.isEmpty()) {
-            nextCursor = friends.get(friends.size() - 1).getId();
+            nextCursor = String.valueOf(friends.get(friends.size() - 1).getUserId());
         }
 
-        return new UserCursorResponse(friends, nextCursor, hasNext);
+        return new PageResponse<>(friends, nextCursor, hasNext);
     }
 
     private String generateInitialUsername() {
@@ -89,4 +92,3 @@ public class UserService {
         return "User_" + randomPart;
     }
 }
-

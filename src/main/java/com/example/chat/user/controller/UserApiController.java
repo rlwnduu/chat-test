@@ -1,8 +1,9 @@
 package com.example.chat.user.controller;
 
+import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.security.user.CustomUserDetails;
-import com.example.chat.user.dto.UserCursorResponse;
 import com.example.chat.user.dto.UserInfoProjection;
+import com.example.chat.user.dto.UserInfoResponse;
 import com.example.chat.user.service.UserService;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -37,13 +38,13 @@ public class UserApiController {
     }
 
     @GetMapping("/users/@me/friends")
-    public ResponseEntity<UserCursorResponse> getMyFriends(
+    public ResponseEntity<PageResponse<UserInfoResponse>> getMyFriends(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "20") @Min(value = 1, message = "size는 1 이상이어야 합니다.") int size
     ) {
         Long userId = userDetails.getId();
-        UserCursorResponse myFriends = userService.getMyFriends(userId, cursor, size);
+        PageResponse<UserInfoResponse> myFriends = userService.getMyFriends(userId, cursor, size);
         return ResponseEntity.ok(myFriends);
     }
 }

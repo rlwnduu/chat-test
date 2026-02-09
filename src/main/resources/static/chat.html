@@ -675,7 +675,7 @@
             const fRes = await safeFetch(`/api/users/@me/friends?size=50`);
             if(fRes) {
                 const d = await fRes.json();
-                const list = d.users || [];
+                const list = d.data || [];
                 currentFriendCount = list.length;
                 if(!friendsSidebar.classList.contains("hidden-mode")) {
                     mainAppTitle.innerHTML = `친구 <span class="text-gray-400 text-sm ml-1 font-medium">${currentFriendCount}</span>`;
@@ -1136,7 +1136,7 @@
             }
 
             const dto = await res.json();
-            const users = dto.users || [];
+            const users = dto.data || [];
             inviteFriendHasNextPage = dto.hasNext;
 
             if (isInitial && users.length === 0) {

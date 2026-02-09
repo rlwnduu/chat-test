@@ -36,4 +36,12 @@ public class UserInfoResponse {
         this.profileImageUrl = profileImageUrl;
         this.profileIconColor = profileIconColor;
     }
+
+    public UserInfoResponse(UserInfoProjection projection) {
+        this.userId = Long.valueOf(projection.getId());
+        this.username = projection.getUsername();
+        this.nickname = projection.getNickname();
+        this.profileImageUrl = projection.getProfileImageUrl();
+        this.profileIconColor = projection.getProfileIconColor();
+    }
 }
