@@ -5,7 +5,6 @@ import com.example.chat.global.security.user.CustomUserDetails;
 import com.example.chat.message.dto.MessageCreateRequest;
 import com.example.chat.message.dto.MessageReadRequest;
 import com.example.chat.message.service.ChatService;
-import com.example.chat.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class ChatController {
 
-    private final UserRepository userRepository;
     private final ChannelService channelService;
     private final ChatService chatService;
 
