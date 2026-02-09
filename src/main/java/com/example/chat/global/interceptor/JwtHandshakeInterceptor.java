@@ -43,14 +43,13 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             log.warn("토큰 검증 또는 subject 추출 중 예외 발생: {}", e.getMessage());
         }
 
-        response.setStatusCode(HttpStatus.UNAUTHORIZED); // 401 응답
+        response.setStatusCode(HttpStatus.UNAUTHORIZED);
         return false;
     }
 
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                WebSocketHandler wsHandler, Exception exception) {
-        // (3) 핸드셰이크 *이후* 최종 결과 로깅
         if (exception == null) {
             log.info("WebSocket 핸드셰이크 성공, 파이프가 열렸습니다. URI: {}", request.getURI());
         } else {

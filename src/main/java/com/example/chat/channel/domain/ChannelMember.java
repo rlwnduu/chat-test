@@ -23,7 +23,7 @@ import java.time.Instant;
         },
         indexes = @Index(name = "idx_user_last_msg", columnList = "user_id, last_message_id DESC")
 )
-@SQLDelete(sql = "UPDATE channel_member SET deleted_at = NOW() WHERE id = ?") // 조건이 id로 변경
+@SQLDelete(sql = "UPDATE channel_member SET deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
 public class ChannelMember {
 

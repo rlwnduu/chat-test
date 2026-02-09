@@ -20,7 +20,7 @@ public class FileController {
         Resource resource = fileService.downloadThumb(fileName);
         if (resource.exists() && resource.isReadable()) {
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG) // 3. "image/jpeg"로 고정
+                    .contentType(MediaType.IMAGE_JPEG)
                     .body(resource);
         } else {
             return ResponseEntity.notFound().build();
@@ -32,7 +32,7 @@ public class FileController {
         Resource resource = fileService.downloadThumb(fileName);
         if (resource.exists() && resource.isReadable()) {
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG) // 3. "image/jpeg"로 고정
+                    .contentType(MediaType.IMAGE_JPEG)
                     .body(resource);
         } else {
             return ResponseEntity.notFound().build();

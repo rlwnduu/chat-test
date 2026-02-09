@@ -8,9 +8,7 @@ import java.util.List;
 public class PageResponse<T> {
 
     private final List<T> data;
-
     private final String nextCursor;
-
     private final boolean hasNext;
 
     public PageResponse(List<T> data, String nextCursor, boolean hasNext) {

@@ -45,14 +45,12 @@ public class RedisService {
     }
 
     public List<String> getValuesList(List<String> keys) {
-        // multiGet은 한 번의 네트워크 호출로 여러 값을 가져옵니다.
         List<Object> values = redisTemplate.opsForValue().multiGet(keys);
 
         if (values == null) {
             return Collections.emptyList();
         }
 
-        // Object -> String 변환 (값이 없으면 null 유지)
         return values.stream()
                 .map(value -> value != null ? value.toString() : null)
                 .toList();

@@ -10,11 +10,9 @@ public class ChannelSummaryProjection {
     private final Long channelId;
     private final String channelName;
     private final int memberCount;
-
     private final Long lastMessageId;
     private final String lastMessageContent;
     private final Instant lastMessageAt;
-
     private final Long myLastReadMessageId;
 
     public ChannelSummaryProjection(

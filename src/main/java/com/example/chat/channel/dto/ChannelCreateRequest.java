@@ -10,7 +10,6 @@ public class ChannelCreateRequest {
     private String channelName;
 
     public ChannelCreateRequest() {
-
     }
 
     public ChannelCreateRequest(String channelName) {

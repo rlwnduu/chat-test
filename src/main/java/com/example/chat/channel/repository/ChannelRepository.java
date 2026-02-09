@@ -33,7 +33,7 @@ public interface ChannelRepository extends JpaRepository<Channel, Long> {
             "   c.id, " +
             "   c.channelName, " +
             "   c.memberCount, " +
-            "   cm.lastMessageId, " + // [변경] Channel 대신 ChannelMember 값 사용
+            "   cm.lastMessageId, " +
             "   c.lastMessageContent, " +
             "   c.lastMessageAt, " +
             "   cm.lastReadMessageId " +
@@ -41,9 +41,8 @@ public interface ChannelRepository extends JpaRepository<Channel, Long> {
             "FROM ChannelMember cm " +
             "JOIN cm.channel c " +
             "WHERE cm.user.id = :userId " +
-            "  AND (:cursorId IS NULL OR cm.lastMessageId < :cursorId) " + // [변경] 커서 조건도 cm 기준
+            "  AND (:cursorId IS NULL OR cm.lastMessageId < :cursorId) " +
             "ORDER BY cm.lastMessageId DESC")
-        // [핵심] 정렬 기준 변경
     Slice<ChannelSummaryProjection> findChannelProjectionsByUserId(
             @Param("userId") Long userId,
             @Param("cursorId") Long cursorId,

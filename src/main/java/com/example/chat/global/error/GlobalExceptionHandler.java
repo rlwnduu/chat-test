@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // [변경] HttpServletRequest 추가 -> 요청 URL 로깅
     @ExceptionHandler(BusinessException.class)
     protected ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e, HttpServletRequest request) {
         log.warn("[BusinessException] Url: {} | Code: {} | Message: {}",
@@ -45,7 +44,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
-        // [중요] 예상치 못한 에러는 StackTrace 전체를 찍되, 요청 URL을 꼭 포함
         log.error("[Unhandled Exception] Url: {} | Message: {}", request.getRequestURI(), e.getMessage(), e);
         return ErrorResponse.toResponseEntity(ErrorCode.INTERNAL_SERVER_ERROR);
     }

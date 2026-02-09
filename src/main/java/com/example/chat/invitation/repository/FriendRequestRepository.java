@@ -23,12 +23,12 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, Lo
             "JOIN fr.inviter i " +
             "JOIN fr.invitee e " +
             "WHERE e.id = :userId " +
-            "AND fr.status = :status " +  // [추가됨] 상태 조건 추가
+            "AND fr.status = :status " +
             "AND (:cursorId IS NULL OR fr.id < :cursorId) " +
             "ORDER BY fr.id DESC")
     Slice<FriendRequestResponse> findRequestsByInviteeIdAndStatusWithCursor(
             @Param("userId") Long userId,
-            @Param("status") RequestStatus status, // [추가됨] Enum 파라미터
+            @Param("status") RequestStatus status,
             @Param("cursorId") Long cursorId,
             Pageable pageable
     );

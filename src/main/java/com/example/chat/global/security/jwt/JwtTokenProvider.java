@@ -25,14 +25,10 @@ import java.util.UUID;
 @Component
 public class JwtTokenProvider {
 
-    public static final long ACCESS_TOKEN_EXPIRE_TIME = 3600000L;  // 1시간
-    public static final long REFRESH_TOKEN_EXPIRE_TIME = 2592000000L; // 7일
+    public static final long ACCESS_TOKEN_EXPIRE_TIME = 3600000L;
+    public static final long REFRESH_TOKEN_EXPIRE_TIME = 2592000000L;
 
     private final SecretKey key;
-
-//    public JwtTokenProvider() {
-//        this.key = Jwts.SIG.HS256.key().build();
-//    }
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
@@ -69,10 +65,8 @@ public class JwtTokenProvider {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (ExpiredJwtException e) {
-            // 만료된 토큰 -> "A003" 에러 코드로 변환해서 던짐
             throw new BusinessException(ErrorCode.EXPIRED_TOKEN);
         } catch (MalformedJwtException | SecurityException | IllegalArgumentException e) {
-            // 위조되거나 잘못된 토큰 -> "A002" 에러 코드로 변환
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         } catch (Exception e) {
             log.error("JWT 처리 중 알 수 없는 에러 발생", e);
@@ -98,7 +92,7 @@ public class JwtTokenProvider {
     public long getRemainingTime(String token) {
         try {
             Date expiration = Jwts.parser()
-                    .verifyWith(key) // 서명 검증 키
+                    .verifyWith(key)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload()

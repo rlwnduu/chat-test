@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class RedisStreamListener implements StreamListener<String, ObjectRecord<String, MessageSaveRequest>> {
+
     private final MessageService messageService;
     private final RedisPublisher redisPublisher;
 

@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @RequiredArgsConstructor
 public class StompEventListener {
+
     private final RedisSubscriptionService redisSubscriptionService;
     
     private final Map<String, String> subscriptionMap = new ConcurrentHashMap<>();

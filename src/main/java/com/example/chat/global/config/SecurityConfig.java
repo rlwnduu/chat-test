@@ -61,7 +61,7 @@ public class SecurityConfig {
                 .logoutSuccessHandler((request, response, authentication) -> {
                     response.setStatus(HttpServletResponse.SC_OK);
                 })
-                .deleteCookies("JSESSIONID") // 쿠키 방식 사용 시 쿠키 삭제
+                .deleteCookies("JSESSIONID")
         );
 
         http.sessionManagement(session -> session

@@ -32,9 +32,7 @@ public class UserService {
     public void createUser(UserCreateRequest userCreateRequest) {
         String loginId = userCreateRequest.getLoginId();
 
-        // [수정] 이미 존재하는 아이디 -> BusinessException (M005 or M002)
         if (userRepository.existsByLoginId(loginId)) {
-            // ErrorCode에 LOGIN_ID_DUPLICATION을 추가하거나, EMAIL_DUPLICATION을 사용하세요.
             throw new BusinessException(ErrorCode.LOGIN_ID_DUPLICATION);
         }
 
@@ -60,7 +58,6 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserInfoProjection getUserInfo(Long userId) {
         return userRepository.findUserInfoById(userId)
-                // [수정] 존재하지 않는 유저 -> BusinessException (M001)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
@@ -70,7 +67,6 @@ public class UserService {
         try {
             longCursor = cursor != null ? Long.parseLong(cursor) : null;
         } catch (NumberFormatException e) {
-            // [수정] 커서 포맷 에러 -> BusinessException (G001: 잘못된 입력값)
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 

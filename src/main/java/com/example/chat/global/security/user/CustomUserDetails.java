@@ -11,10 +11,13 @@ import java.util.Set;
 public class CustomUserDetails implements UserDetails {
 
     @Getter
-    private Long id;
-    private String username;
-    private String password;
-    private Set<? extends GrantedAuthority> authorities;
+    private final Long id;
+
+    private final String username;
+
+    private final String password;
+
+    private final Set<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user, Set<? extends GrantedAuthority> authorities) {
         this.id = user.getId();
@@ -40,21 +43,21 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // 계정 만료 여부(커스텀 가능)
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // 계정 잠김 여부(커스텀 가능)
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // 인증정보 만료 여부(커스텀 가능)
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // 활성화 여부(커스텀 가능)
+        return true;
     }
 }

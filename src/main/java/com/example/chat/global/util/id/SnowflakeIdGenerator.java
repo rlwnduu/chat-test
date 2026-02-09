@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class SnowflakeIdGenerator implements IdentifierGenerator {
 
-    private static final long EPOCH = 1622505600000L; // 기준 시각(커스텀 가능)
+    private static final long EPOCH = 1622505600000L;
     private static final long NODE_ID_BITS = 10L;
     private static final long SEQUENCE_BITS = 12L;
     private static final long MAX_NODE_ID = (1L << NODE_ID_BITS) - 1;

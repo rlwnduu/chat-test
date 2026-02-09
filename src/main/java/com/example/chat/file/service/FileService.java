@@ -31,13 +31,13 @@ public class FileService {
 
         try {
             Thumbnails.of(profileImage.getInputStream())
-                    .scale(1.0) // 크기 유지
-                    .outputFormat("jpg") // 5. JPG로 강제 변환
+                    .scale(1.0)
+                    .outputFormat("jpg")
                     .toFile(orig);
 
             Thumbnails.of(Path.of(orig).toFile())
                     .size(100, 100)
-                    .outputFormat("jpg") // 7. JPG로 저장
+                    .outputFormat("jpg")
                     .toFile(thumb);
 
             return fileName;

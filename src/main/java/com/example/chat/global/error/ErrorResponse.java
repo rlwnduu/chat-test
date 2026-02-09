@@ -19,9 +19,8 @@ public class ErrorResponse {
     private final int status;
     private final String code;
     private final String message;
-    private final List<CustomFieldError> errors; // 유효성 검사 실패 시 필드 에러 목록
+    private final List<CustomFieldError> errors;
 
-    // 1. 일반 에러 응답 생성 메서드
     public static ResponseEntity<ErrorResponse> toResponseEntity(ErrorCode errorCode) {
         return ResponseEntity
                 .status(errorCode.getStatus())
@@ -32,7 +31,6 @@ public class ErrorResponse {
                         .build());
     }
 
-    // 2. 유효성 검사(@Valid) 실패 시 응답 생성 메서드
     public static ResponseEntity<ErrorResponse> toResponseEntity(ErrorCode errorCode, BindingResult bindingResult) {
         return ResponseEntity
                 .status(errorCode.getStatus())
@@ -40,11 +38,10 @@ public class ErrorResponse {
                         .status(errorCode.getStatus().value())
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage())
-                        .errors(CustomFieldError.of(bindingResult)) // 필드 에러 목록 추가
+                        .errors(CustomFieldError.of(bindingResult))
                         .build());
     }
 
-    // 내부 클래스: 필드 에러 정보 (ex: email 필드는 필수입니다)
     @Getter
     @AllArgsConstructor
     public static class CustomFieldError {

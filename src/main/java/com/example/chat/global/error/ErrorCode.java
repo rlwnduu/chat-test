@@ -18,13 +18,10 @@ public enum ErrorCode {
     // ======================================================================
     // 2. Auth (인증/인가 - 코드 prefix: A)
     // ======================================================================
-    // 401 Unauthorized: 인증되지 않음
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "A001", "아이디 또는 비밀번호가 일치하지 않습니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A002", "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "A003", "만료된 토큰입니다."),
     EMPTY_TOKEN(HttpStatus.UNAUTHORIZED, "A004", "토큰이 존재하지 않습니다."),
-
-    // 403 Forbidden: 권한 없음
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "A005", "해당 리소스에 접근 권한이 없습니다."),
 
     // ======================================================================
@@ -63,11 +60,6 @@ public enum ErrorCode {
     MESSAGE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "MS001", "메시지 전송에 실패했습니다."),
     FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "MS002", "파일 크기가 제한을 초과했습니다."),
     UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, "MS003", "지원하지 않는 파일 형식입니다.");
-
-
-//    // E2EE (종단간 암호화) 관련
-//    PUBLIC_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "MS004", "상대방의 공개키를 찾을 수 없습니다."),
-//    DECRYPTION_FAILED(HttpStatus.BAD_REQUEST, "MS005", "메시지 복호화에 실패했습니다.");
 
     private final HttpStatus status;
     private final String code;

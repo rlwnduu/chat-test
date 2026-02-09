@@ -17,18 +17,18 @@ public class ChannelInvite {
 
     @ManyToOne
     @JoinColumn(name = "inviter_id")
-    private User inviter;     // 초대를 보낸 사람
+    private User inviter;
 
     @ManyToOne
     @JoinColumn(name = "invitee_id")
-    private User invitee;  // 초대를 받은 사람
+    private User invitee;
 
     @ManyToOne
     @JoinColumn(name = "channel_id")
     private Channel channel;
 
     @Enumerated(EnumType.STRING)
-    private RequestStatus status; // (PENDING, ACCEPTED, DECLINED)
+    private RequestStatus status;
 
     private Instant createdAt;
 

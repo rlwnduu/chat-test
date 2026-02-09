@@ -10,6 +10,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageSaveRequest {
+
     private Long channelId;
     private Long authorId;
     private String content;

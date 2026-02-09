@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 public class ChatService {
 
     private final SimpMessagingTemplate messagingTemplate;
-
     private final RedisStreamService redisStreamService;
 
     public void sendMessage(Long channelId, Long authorId, MessageCreateRequest request) {

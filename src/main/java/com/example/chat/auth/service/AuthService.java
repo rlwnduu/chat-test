@@ -18,5 +18,4 @@ public class AuthService {
     public void registerUser(UserCreateRequest userCreateRequest) {
         userService.createUser(userCreateRequest);
     }
-
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class RedisStreamService {
+
     public static final String GLOBAL_STREAM_KEY = "chat:stream:global";
 
     private final RedisTemplate<String, Object> redisTemplate;

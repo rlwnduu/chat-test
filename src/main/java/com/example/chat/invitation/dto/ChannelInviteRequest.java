@@ -8,7 +8,6 @@ import lombok.ToString;
 public class ChannelInviteRequest {
 
     private Long channelId;
-
     private Long inviteeId;
 
     protected ChannelInviteRequest() {

@@ -8,13 +8,9 @@ public class ChannelMemberResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userId;
-
     private String username;
-
     private String nickname;
-
     private String profileImageUrl;
-
     private String profileIconColor;
 
     public ChannelMemberResponse() {

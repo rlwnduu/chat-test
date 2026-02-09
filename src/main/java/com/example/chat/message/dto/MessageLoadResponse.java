@@ -10,11 +10,8 @@ import java.util.Map;
 public class MessageLoadResponse {
 
     private List<MessageView> messages;
-
     private Map<String, UserInfoResponse> userInfoDtoMap;
-
     private String nextCursor;
-
     private boolean hasNext;
 
     public MessageLoadResponse(List<MessageView> messages,

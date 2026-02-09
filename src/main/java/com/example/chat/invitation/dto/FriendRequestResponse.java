@@ -12,13 +12,9 @@ import java.time.Instant;
 public class FriendRequestResponse {
 
     private Long id;
-
     private UserInfoResponse inviter;
-
     private UserInfoResponse invitee;
-
     private RequestStatus status;
-
     private Instant createdAt;
 
     public FriendRequestResponse() {

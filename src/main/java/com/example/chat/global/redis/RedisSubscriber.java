@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class RedisSubscriber implements MessageListener {
+
     private final ObjectMapper objectMapper;
     private final SimpMessageSendingOperations messagingTemplate;
 

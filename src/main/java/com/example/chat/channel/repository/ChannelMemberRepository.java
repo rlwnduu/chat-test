@@ -10,7 +10,7 @@ public interface ChannelMemberRepository extends JpaRepository<ChannelMember, Lo
 
     boolean existsByChannelIdAndUserId(Long channelId, Long userId);
 
-    @Modifying(clearAutomatically = true) // 쿼리 실행 후 영속성 컨텍스트 초기화 (중요!)
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE ChannelMember cm " +
             "SET cm.lastReadMessageId = :lastReadMessageId " +
             "WHERE cm.channel.id = :channelId " +
@@ -22,7 +22,6 @@ public interface ChannelMemberRepository extends JpaRepository<ChannelMember, Lo
             @Param("lastReadMessageId") Long lastReadMessageId
     );
 
-    // JPQL Bulk Update 예시
     @Modifying
     @Query("UPDATE ChannelMember cm SET cm.lastMessageId = :msgId WHERE cm.channel.id = :channelId")
     void updateLastMessageId(@Param("channelId") Long channelId, @Param("msgId") Long msgId);

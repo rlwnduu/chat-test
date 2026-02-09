@@ -21,7 +21,6 @@ public class WebSocketSecurityConfig {
 
     @Bean
     AuthorizationManager<Message<?>> messageAuthorizationManager() {
-
         MessageMatcherDelegatingAuthorizationManager.Builder messages =
                 MessageMatcherDelegatingAuthorizationManager.builder();
 

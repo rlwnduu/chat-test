@@ -29,8 +29,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final ApplicationContext applicationContext;
     private final AuthorizationManager<Message<?>> authorizationManager;
-
-
     private final CustomStompErrorHandler customStompErrorHandler;
 
     @Bean
@@ -54,17 +52,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         authz.setAuthorizationEventPublisher(publisher);
         registration.interceptors(new SecurityContextChannelInterceptor(), authz);
         registration.taskExecutor()
-                .corePoolSize(8)   // 기본 스레드 수
-                .maxPoolSize(20)   // 최대 스레드 수
-                .queueCapacity(100); // 대기열 크기
+                .corePoolSize(8)
+                .maxPoolSize(20)
+                .queueCapacity(100);
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic")
-                .setTaskScheduler(taskScheduler()) // 아래에서 만든 빈을 주입
+                .setTaskScheduler(taskScheduler())
                 .setHeartbeatValue(new long[]{10000L, 10000L});
-
         registry.setApplicationDestinationPrefixes("/app");
 
 

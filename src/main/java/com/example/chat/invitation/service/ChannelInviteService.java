@@ -34,7 +34,7 @@ public class ChannelInviteService {
     private final UserRepository userRepository;
     private final ChatService chatService;
 
-    @Transactional(readOnly = true) // 조회의 경우 readOnly 권장
+    @Transactional(readOnly = true)
     public PageResponse<ChannelInviteResponse> getChannelInvitations(Long inviteeId, String cursor, int size) {
         Long cursorId = (cursor == null) ? null : Long.parseLong(cursor);
         Pageable pageable = PageRequest.of(0, size);
@@ -60,7 +60,6 @@ public class ChannelInviteService {
         User inviter = userRepository.findById(inviterId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
-        // 초대자가 채널 멤버인지 확인
         if (!channelMemberRepository.existsByChannelIdAndUserId(channelId, inviterId)) {
             throw new BusinessException(ErrorCode.NOT_ROOM_MEMBER);
         }
@@ -68,7 +67,6 @@ public class ChannelInviteService {
         User invitee = userRepository.findById(inviteeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
-        // 초대받는 사람이 이미 멤버인지 확인
         if (channelMemberRepository.existsByChannelIdAndUserId(channelId, inviteeId)) {
             throw new BusinessException(ErrorCode.ALREADY_JOINED_ROOM);
         }
@@ -87,19 +85,16 @@ public class ChannelInviteService {
     @Transactional
     public void accept(Long invitationId, Long userId) {
         ChannelInvite invitation = channelInviteRepository.findById(invitationId)
-                // ErrorCode에 INVITATION_NOT_FOUND 추가 권장 (혹은 C006 INVALID_INVITATION_CODE 사용)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVITATION_NOT_FOUND));
 
         User invitee = invitation.getInvitee();
 
-        // 당사자 확인
         if (!invitee.getId().equals(userId)) {
-            throw new BusinessException(ErrorCode.ACCESS_DENIED); // 혹은 "권한 없음"
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
         Channel channel = invitation.getChannel();
 
-        // 이미 가입된 상태인지 이중 체크
         if (channelMemberRepository.existsByChannelIdAndUserId(channel.getId(), userId)) {
             throw new BusinessException(ErrorCode.ALREADY_JOINED_ROOM);
         }
@@ -109,7 +104,7 @@ public class ChannelInviteService {
 
         channel.incrementMemberCount();
         invitee.decrementChannelInviteCount();
-        invitation.accept(); // 상태 변경 (ACCEPTED)
+        invitation.accept();
 
         chatService.broadcastMemberUpdate(channel.getId(), channel.getMemberCount());
     }
@@ -129,7 +124,7 @@ public class ChannelInviteService {
             throw new BusinessException(ErrorCode.ALREADY_JOINED_ROOM);
         }
 
-        invitation.decline(); // 상태 변경 (REJECTED)
+        invitation.decline();
         invitee.decrementChannelInviteCount();
     }
 }
