@@ -1,11 +1,9 @@
 package com.example.chat.message.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
+@Builder
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
