@@ -5,6 +5,8 @@ import com.example.chat.global.util.id.SnowflakeId;
 import com.example.chat.user.dto.UserCreateRequest;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -13,8 +15,12 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import static lombok.AccessLevel.PROTECTED;
+
 @Entity
 @Getter
+@NoArgsConstructor(access = PROTECTED)
+@ToString(exclude = {"password", "authorities", "channelMembers"})
 @Table(name = "users")
 @SQLDelete(sql = "UPDATE users SET deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
@@ -59,9 +65,6 @@ public class User {
     private Instant createdAt;
 
     private Instant deletedAt;
-
-    public User() {
-    }
 
     public User(String loginId,
                 String password,
