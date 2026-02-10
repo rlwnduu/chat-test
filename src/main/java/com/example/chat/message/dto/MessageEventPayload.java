@@ -11,7 +11,7 @@ import lombok.ToString;
 import java.time.Instant;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageEventPayload extends WebSocketPayload {
 
@@ -31,19 +31,18 @@ public class MessageEventPayload extends WebSocketPayload {
         super(PayloadType.MESSAGE);
     }
 
-    public MessageEventPayload(Message message, UserInfoProjection authorProjection) {
+    public MessageEventPayload(Message message, UserInfoProjection userInfoProjection) {
         super(PayloadType.MESSAGE);
         this.messageId = message.getId();
         this.channelId = message.getChannelId();
         this.content = message.getContent();
         this.createdAt = message.getCreatedAt();
-        
         this.author = new UserInfoResponse(
-                Long.parseLong(authorProjection.getId()),
-                authorProjection.getUsername(),
-                authorProjection.getNickname(),
-                authorProjection.getProfileImageUrl(),
-                authorProjection.getProfileIconColor()
+                Long.parseLong(userInfoProjection.getId()),
+                userInfoProjection.getUsername(),
+                userInfoProjection.getNickname(),
+                userInfoProjection.getProfileImageUrl(),
+                userInfoProjection.getProfileIconColor()
         );
     }
 }
