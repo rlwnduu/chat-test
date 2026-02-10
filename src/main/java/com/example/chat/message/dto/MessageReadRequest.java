@@ -1,16 +1,13 @@
 package com.example.chat.message.dto;
 
-import lombok.Getter;
+import lombok.*;
 
 @Getter
+@Builder
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class MessageReadRequest {
 
     private Long lastReadMessageId;
-
-    public MessageReadRequest() {
-    }
-
-    public MessageReadRequest(Long lastReadMessageId) {
-        this.lastReadMessageId = lastReadMessageId;
-    }
 }
