@@ -2,9 +2,13 @@ package com.example.chat.user.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import static lombok.AccessLevel.PROTECTED;
 
 @Getter
 @Entity
+@NoArgsConstructor(access = PROTECTED)
 @Table(
         name = "user_friend",
         uniqueConstraints = {
@@ -28,9 +32,6 @@ public class UserFriend {
     @JoinColumn(name = "user_b_id", nullable = false)
     private User userB;
 
-    protected UserFriend() {
-    }
-
     public UserFriend(User user1, User user2) {
         if (user1.getId().equals(user2.getId())) {
             throw new IllegalArgumentException("User cannot be friends with themselves.");
@@ -46,5 +47,15 @@ public class UserFriend {
 
         userA.incrementFriendCount();
         userB.incrementFriendCount();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() +
+                "{" +
+                "id=" + id +
+                ", userAId=" + (userA != null ? userA.getId() : "null") +
+                ", userBId=" + (userB != null ? userB.getId() : "null") +
+                "}";
     }
 }
