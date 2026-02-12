@@ -12,8 +12,9 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -48,9 +49,8 @@ public class User {
 
     private UserStatus status;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "id")
-    private List<Authority> authorities = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Authority> authorities = new HashSet<>();
 
     private int friendCount;
 
@@ -91,7 +91,17 @@ public class User {
         user.profileImageUrl = null;
         user.profileIconColor = initialProfileIconColor;
         user.status = UserStatus.ACTIVE;
+        user.addRole(Role.USER);
         return user;
+    }
+
+    public void addRole(Role role) {
+        Authority authority = new Authority(this, role);
+        this.authorities.add(authority);
+    }
+
+    public void removeRole(Role role) {
+        this.authorities.removeIf(auth -> auth.getRole() == role);
     }
 
     public void incrementFriendCount() {

@@ -42,12 +42,7 @@ public class UserService {
         String initialNickname = initialUsername;
         String initialProfileIconColor = ProfileColor.getRandomHexCode();
 
-        User user = new User(loginId,
-                encodedPassword,
-                initialUsername,
-                initialNickname,
-                initialProfileIconColor
-        );
+        User user = User.create(userCreateRequest, encodedPassword, initialUsername, initialProfileIconColor);
         userRepository.save(user);
     }
 
