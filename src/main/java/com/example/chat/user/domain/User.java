@@ -13,7 +13,6 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -55,7 +54,7 @@ public class User {
     private int friendCount;
 
     @OneToMany(mappedBy = "user")
-    private List<ChannelMember> channelMembers;
+    private Set<ChannelMember> channelMembers = new HashSet<>();
 
     private int channelInviteCount;
 
@@ -65,19 +64,6 @@ public class User {
     private Instant createdAt;
 
     private Instant deletedAt;
-
-    public User(String loginId,
-                String password,
-                String username,
-                String nickname,
-                String profileIconColor
-    ) {
-        this.loginId = loginId;
-        this.password = password;
-        this.username = username;
-        this.nickname = nickname;
-        this.profileIconColor = profileIconColor;
-    }
 
     public static User create(UserCreateRequest userCreateRequest,
                               String encodedPassword,
