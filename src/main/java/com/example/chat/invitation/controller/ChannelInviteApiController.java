@@ -4,11 +4,17 @@ import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.security.user.CustomUserDetails;
 import com.example.chat.invitation.dto.ChannelInviteRequest;
 import com.example.chat.invitation.dto.ChannelInviteResponse;
+import com.example.chat.invitation.dto.InviteSearchCondition;
 import com.example.chat.invitation.service.ChannelInviteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,13 +25,14 @@ public class ChannelInviteApiController {
 
     @GetMapping("/users/@me/channel-invites")
     public ResponseEntity<PageResponse<ChannelInviteResponse>> getMyChannelInvitations(
-            @RequestParam(required = false) String cursor,
-            @RequestParam(defaultValue = "20") int size,
+            InviteSearchCondition condition,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getId();
+        condition.setUserId(userDetails.getId());
+
         PageResponse<ChannelInviteResponse> response
-                = channelInviteService.getChannelInvitations(userId, cursor, size);
+                = channelInviteService.getChannelInvitations(condition);
+
         return ResponseEntity.ok(response);
     }
 

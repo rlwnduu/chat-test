@@ -8,17 +8,16 @@ import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.error.BusinessException;
 import com.example.chat.global.error.ErrorCode;
 import com.example.chat.invitation.domain.ChannelInvite;
+import com.example.chat.invitation.domain.RequestStatus;
 import com.example.chat.invitation.dto.ChannelInviteRequest;
 import com.example.chat.invitation.dto.ChannelInviteResponse;
+import com.example.chat.invitation.dto.InviteSearchCondition;
 import com.example.chat.invitation.repository.ChannelInviteRepository;
 import com.example.chat.message.service.ChatService;
 import com.example.chat.user.domain.User;
 import com.example.chat.user.dto.UserInfoResponse;
 import com.example.chat.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,16 +34,19 @@ public class ChannelInviteService {
     private final ChatService chatService;
 
     @Transactional(readOnly = true)
-    public PageResponse<ChannelInviteResponse> getChannelInvitations(Long inviteeId, String cursor, int size) {
-        Long cursorId = (cursor == null) ? null : Long.parseLong(cursor);
-        Pageable pageable = PageRequest.of(0, size);
+    public PageResponse<ChannelInviteResponse> getChannelInvitations(InviteSearchCondition condition) {
+        condition.setStatus(RequestStatus.PENDING);
+        List<ChannelInviteResponse> content = channelInviteRepository.search(condition);
 
-        Slice<ChannelInviteResponse> slice = channelInviteRepository
-                .findInvitationsByInviteeIdWithCursor(inviteeId, cursorId, pageable);
+        boolean hasNext = content.size() > condition.getSize();
+        if (hasNext) {
+            content.remove(condition.getSize());
+        }
 
-        List<ChannelInviteResponse> content = slice.getContent();
-        boolean hasNext = slice.hasNext();
-        String nextCursor = hasNext ? content.get(content.size() - 1).getId().toString() : null;
+        String nextCursor = null;
+        if (hasNext && !content.isEmpty()) {
+            nextCursor = content.get(content.size() - 1).getId().toString();
+        }
 
         return new PageResponse<>(content, nextCursor, hasNext);
     }
