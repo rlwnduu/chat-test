@@ -2,7 +2,11 @@ package com.example.chat.user.dto;
 
 import com.example.chat.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @Builder
@@ -12,7 +16,7 @@ import lombok.*;
 public class UserInfoResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Long userId;
+    private Long id;
 
     private String username;
 
@@ -23,7 +27,7 @@ public class UserInfoResponse {
     private String profileIconColor;
 
     public UserInfoResponse(User user) {
-        this.userId = user.getId();
+        this.id = user.getId();
         this.username = user.getUsername();
         this.nickname = user.getNickname();
         this.profileImageUrl = user.getProfileImageUrl();
@@ -31,7 +35,7 @@ public class UserInfoResponse {
     }
 
     public UserInfoResponse(UserInfoProjection projection) {
-        this.userId = Long.valueOf(projection.getId());
+        this.id = Long.valueOf(projection.getId());
         this.username = projection.getUsername();
         this.nickname = projection.getNickname();
         this.profileImageUrl = projection.getProfileImageUrl();

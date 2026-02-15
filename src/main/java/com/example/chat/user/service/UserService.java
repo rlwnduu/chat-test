@@ -78,7 +78,7 @@ public class UserService {
         String nextCursor = null;
 
         if (hasNext && !friends.isEmpty()) {
-            nextCursor = String.valueOf(friends.get(friends.size() - 1).getUserId());
+            nextCursor = String.valueOf(friends.get(friends.size() - 1).getId());
         }
 
         return new PageResponse<>(friends, nextCursor, hasNext);
