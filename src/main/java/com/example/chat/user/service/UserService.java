@@ -3,11 +3,12 @@ package com.example.chat.user.service;
 import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.error.BusinessException;
 import com.example.chat.global.error.ErrorCode;
-import com.example.chat.user.domain.ProfileColor;
+import com.example.chat.user.domain.Role;
 import com.example.chat.user.domain.User;
 import com.example.chat.user.dto.UserCreateRequest;
 import com.example.chat.user.dto.UserInfoProjection;
 import com.example.chat.user.dto.UserInfoResponse;
+import com.example.chat.user.mapper.UserMapper;
 import com.example.chat.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     @Transactional
     public void createUser(UserCreateRequest userCreateRequest) {
@@ -39,10 +41,10 @@ public class UserService {
 
         String encodedPassword = passwordEncoder.encode(userCreateRequest.getPassword());
         String initialUsername = generateInitialUsername();
-        String initialNickname = initialUsername;
-        String initialProfileIconColor = ProfileColor.getRandomHexCode();
 
-        User user = User.create(userCreateRequest, encodedPassword, initialUsername, initialProfileIconColor);
+        User user = userMapper.toEntity(userCreateRequest, encodedPassword, initialUsername);
+        user.addRole(Role.USER);
+
         userRepository.save(user);
     }
 

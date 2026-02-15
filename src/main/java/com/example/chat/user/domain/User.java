@@ -2,8 +2,16 @@ package com.example.chat.user.domain;
 
 import com.example.chat.channel.domain.ChannelMember;
 import com.example.chat.global.util.id.SnowflakeId;
-import com.example.chat.user.dto.UserCreateRequest;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PreRemove;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -19,6 +27,8 @@ import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = PROTECTED)
 @ToString(exclude = {"password", "authorities", "channelMembers"})
 @Table(name = "users")
@@ -48,11 +58,13 @@ public class User {
 
     private UserStatus status;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Authority> authorities = new HashSet<>();
 
     private int friendCount;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     private Set<ChannelMember> channelMembers = new HashSet<>();
 
@@ -64,22 +76,6 @@ public class User {
     private Instant createdAt;
 
     private Instant deletedAt;
-
-    public static User create(UserCreateRequest userCreateRequest,
-                              String encodedPassword,
-                              String initialUsername,
-                              String initialProfileIconColor) {
-        User user = new User();
-        user.loginId = userCreateRequest.getLoginId();
-        user.password = encodedPassword;
-        user.username = initialUsername;
-        user.nickname = initialUsername;
-        user.profileImageUrl = null;
-        user.profileIconColor = initialProfileIconColor;
-        user.status = UserStatus.ACTIVE;
-        user.addRole(Role.USER);
-        return user;
-    }
 
     public void addRole(Role role) {
         Authority authority = new Authority(this, role);
