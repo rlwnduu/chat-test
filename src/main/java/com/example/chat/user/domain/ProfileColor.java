@@ -1,8 +1,13 @@
 package com.example.chat.user.domain;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Getter
+@RequiredArgsConstructor
 public enum ProfileColor {
 
     RED("#EF4444"),
@@ -23,18 +28,10 @@ public enum ProfileColor {
     PINK("#EC4899"),
     ROSE("#F43F5E");
 
-    private final String hexCode;
-
-    ProfileColor(String hexCode) {
-        this.hexCode = hexCode;
-    }
-
-    public String getHexCode() {
-        return hexCode;
-    }
-
     private static final List<ProfileColor> VALUES = List.of(values());
     private static final int SIZE = VALUES.size();
+
+    private final String hexCode;
 
     public static String getRandomHexCode() {
         int randomIndex = ThreadLocalRandom.current().nextInt(SIZE);
