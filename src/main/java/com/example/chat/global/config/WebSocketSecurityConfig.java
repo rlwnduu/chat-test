@@ -32,8 +32,7 @@ public class WebSocketSecurityConfig {
                         SimpMessageType.HEARTBEAT
                 ).permitAll()
                 .simpDestMatchers("/app/**").authenticated()
-//                .simpSubscribeDestMatchers("/user/queue/errors").permitAll()
-//                .simpSubscribeDestMatchers("/user/**").authenticated()
+                .simpSubscribeDestMatchers("/user/**").authenticated()
                 .simpSubscribeDestMatchers("/topic/**").authenticated()
                 .anyMessage().denyAll();
 
