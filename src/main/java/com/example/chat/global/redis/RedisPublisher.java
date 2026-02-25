@@ -15,7 +15,9 @@ public class RedisPublisher {
     private final RedisTemplate<String, Object> redisTemplate;
 
     public void publish(MessageEventPayload payload) {
-        ChannelTopic topic = new ChannelTopic("chat:channel:" + payload.getChannelId());
+        Long channelId = payload.getChannelId();
+        String id = String.valueOf(channelId);
+        ChannelTopic topic = new ChannelTopic(RedisTopic.CHAT_ROOM.makeTopic(id));
         redisTemplate.convertAndSend(topic.getTopic(), payload);
     }
 }
