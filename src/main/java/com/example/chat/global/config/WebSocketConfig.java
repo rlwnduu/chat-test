@@ -1,5 +1,7 @@
 package com.example.chat.global.config;
 
+import com.example.chat.global.websocket.CustomHandshakeHandler;
+import com.example.chat.global.websocket.CustomStompErrorHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

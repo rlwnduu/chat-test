@@ -1,4 +1,4 @@
-package com.example.chat.global.config;
+package com.example.chat.global.websocket;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;

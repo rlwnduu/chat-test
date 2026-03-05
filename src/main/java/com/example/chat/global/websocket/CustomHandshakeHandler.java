@@ -1,4 +1,4 @@
-package com.example.chat.global.config;
+package com.example.chat.global.websocket;
 
 import com.example.chat.global.security.user.CustomUserDetails;
 import com.example.chat.global.security.user.StompPrincipal;
