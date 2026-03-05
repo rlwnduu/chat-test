@@ -1,8 +1,16 @@
 package com.example.chat.channel.domain;
 
 import com.example.chat.channel.dto.ChannelCreateRequest;
+import com.example.chat.global.domain.BaseTimeEntity;
 import com.example.chat.global.util.id.SnowflakeId;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PreRemove;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -16,7 +24,7 @@ import java.util.Set;
 @Table(indexes = @Index(name = "idx_last_message_id", columnList = "lastMessageId DESC"))
 @SQLDelete(sql = "UPDATE channel SET deleted_at = NOW() WHERE channel_id = ?")
 @SQLRestriction("deleted_at IS NULL")
-public class Channel {
+public class Channel extends BaseTimeEntity {
 
     @Id
     @SnowflakeId
@@ -38,8 +46,6 @@ public class Channel {
 
     private Instant lastMessageAt;
 
-    private Instant createdAt;
-
     private Instant deletedAt;
 
     public Channel() {
@@ -49,7 +55,6 @@ public class Channel {
     public static Channel from(ChannelCreateRequest channelCreateRequest) {
         Channel channel = new Channel();
         channel.channelName = channelCreateRequest.getChannelName();
-        channel.createdAt = Instant.now();
         return channel;
     }
 

@@ -1,5 +1,6 @@
 package com.example.chat.channel.domain;
 
+import com.example.chat.global.domain.BaseTimeEntity;
 import com.example.chat.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,7 +14,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -34,7 +34,7 @@ import java.util.Objects;
 )
 @SQLDelete(sql = "UPDATE channel_member SET deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
-public class ChannelMember {
+public class ChannelMember extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,9 +47,6 @@ public class ChannelMember {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @CreationTimestamp
-    private Instant createdAt;
 
     private Long lastMessageId;
 

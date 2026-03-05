@@ -1,15 +1,22 @@
 package com.example.chat.invitation.domain;
 
 import com.example.chat.channel.domain.Channel;
+import com.example.chat.global.domain.BaseTimeEntity;
 import com.example.chat.user.domain.User;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 
 import java.time.Instant;
 
 @Getter
 @Entity
-public class ChannelInvite {
+public class ChannelInvite extends BaseTimeEntity {
 
     @Id
     @GeneratedValue
@@ -30,10 +37,6 @@ public class ChannelInvite {
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
 
-    private Instant createdAt;
-
-    private Instant updatedAt;
-
     private Instant deletedAt;
 
     protected ChannelInvite() {
@@ -44,16 +47,13 @@ public class ChannelInvite {
         this.invitee = invitee;
         this.channel = channel;
         this.status = RequestStatus.PENDING;
-        this.createdAt = Instant.now();
     }
 
     public void accept() {
         this.status = RequestStatus.ACCEPTED;
-        this.updatedAt = Instant.now();
     }
 
     public void decline() {
         this.status = RequestStatus.DECLINED;
-        this.updatedAt = Instant.now();
     }
 }

@@ -1,6 +1,15 @@
 package com.example.chat.user.domain;
 
-import jakarta.persistence.*;
+import com.example.chat.global.domain.BaseTimeEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,7 +27,7 @@ import static lombok.AccessLevel.PROTECTED;
                 )
         }
 )
-public class UserFriend {
+public class UserFriend extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

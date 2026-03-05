@@ -1,10 +1,12 @@
 package com.example.chat.user.domain;
 
 import com.example.chat.channel.domain.ChannelMember;
+import com.example.chat.global.domain.BaseTimeEntity;
 import com.example.chat.global.util.id.SnowflakeId;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreRemove;
@@ -15,9 +17,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -30,11 +32,12 @@ import static lombok.AccessLevel.PROTECTED;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 @ToString(exclude = {"password", "authorities", "channelMembers"})
 @Table(name = "users")
 @SQLDelete(sql = "UPDATE users SET deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
-public class User {
+public class User extends BaseTimeEntity {
 
     @Id
     @SnowflakeId
@@ -71,9 +74,6 @@ public class User {
     private int channelInviteCount;
 
     private int friendRequestCount;
-
-    @CreationTimestamp
-    private Instant createdAt;
 
     private Instant deletedAt;
 
