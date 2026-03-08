@@ -975,8 +975,25 @@
             stompClient.activate();
         }
 
-        function subscribeToChannel(cid) {
+        async function subscribeToChannel(cid) {
             if(currentSubscription) currentSubscription.unsubscribe();
+
+            const MAX_RETRIES = 10
+            let isConnected = false;
+
+            for (let i = 0; i < MAX_RETRIES; i++) {
+                if (stompClient && stompClient.connected) {
+                    isConnected = true;
+                    break;
+                }
+                await delay(200);
+            }
+
+            if (!isConnected) {
+                console.error("🚨 2초 대기 초과: 채팅 서버와 연결할 수 없습니다.");
+                alert("채팅 서버 연결에 실패했습니다. 새로고침을 시도해주세요.");
+                return;
+            }
 
             // [수정] subscribe 헤더 제거
             currentSubscription = stompClient.subscribe(`/topic/channel.${cid}`, msg => {
@@ -997,6 +1014,8 @@
                 }
             });
         }
+
+        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
         async function switchNotificationSubTab(type) {
             notificationList.innerHTML = '<li class="p-4 text-center text-gray-500">로딩 중...</li>';
