@@ -12,6 +12,7 @@ import com.example.chat.channel.util.ChannelMemberCursorMapper;
 import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.error.BusinessException;
 import com.example.chat.global.error.ErrorCode;
+import com.example.chat.message.domain.Message;
 import com.example.chat.message.repository.MessageRepository;
 import com.example.chat.user.domain.User;
 import com.example.chat.user.repository.UserRepository;
@@ -22,7 +23,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +47,8 @@ public class ChannelService {
         channelMemberRepository.save(channelMember);
         channel.incrementMemberCount();
 
-        return ChannelSummaryResponse.from(channel, 0);
+        Message message = Message.create(channel.getId(), null, null);
+        return ChannelSummaryResponse.from(channel, message, 0);
     }
 
     @Transactional(readOnly = true)
@@ -59,9 +60,12 @@ public class ChannelService {
             return new PageResponse<>(Collections.emptyList(), null, false);
         }
 
+        List<Long> channelIds = projections.stream().map(ChannelSummaryProjection::getId).toList();
+        Map<Long, Message> lastMessages = messageRepository.findLastMessagesByChannelIds(channelIds);
+
         Map<Long, Integer> unreadCounts = resolveUnreadCounts(userId, projections);
 
-        List<ChannelSummaryResponse> responses = createResponses(projections, unreadCounts);
+        List<ChannelSummaryResponse> responses = createResponses(projections, lastMessages, unreadCounts);
         String nextCursor = getNextCursor(projectionSlice, responses);
         return new PageResponse<>(responses, nextCursor, projectionSlice.hasNext());
     }
@@ -75,7 +79,7 @@ public class ChannelService {
         Map<Long, Long> channelReadMap = new HashMap<>();
 
         for (ChannelSummaryProjection proj : projections) {
-            channelReadMap.put(proj.getChannelId(), proj.getMyLastReadMessageId());
+            channelReadMap.put(proj.getId(), proj.getLastReadMessageId());
         }
 
         if (channelReadMap.isEmpty()) {
@@ -85,11 +89,14 @@ public class ChannelService {
         return messageRepository.countUnreadMessagesBatch(channelReadMap);
     }
 
-    private List<ChannelSummaryResponse> createResponses(List<ChannelSummaryProjection> projections, Map<Long, Integer> unreadCounts) {
+    private List<ChannelSummaryResponse> createResponses(List<ChannelSummaryProjection> projections,
+                                                         Map<Long, Message> lastMessages,
+                                                         Map<Long, Integer> unreadCounts) {
         return projections.stream()
                 .map(proj -> ChannelSummaryResponse.from(
                         proj,
-                        unreadCounts.getOrDefault(proj.getChannelId(), 0) // 안전하게 0 처리
+                        lastMessages.getOrDefault(proj.getId(), Message.create(proj.getId(), null, null)),
+                        unreadCounts.getOrDefault(proj.getId(), 0) // 안전하게 0 처리
                 ))
                 .toList();
     }
@@ -123,18 +130,6 @@ public class ChannelService {
                 nextCursor,
                 memberSlice.hasNext()
         );
-    }
-
-    @Transactional
-    public void updateChannelPreview(Long channelId, Long lastMessageId, String content, Instant createdAt) {
-        String truncatedContent = content.length() > 100 ? content.substring(0, 97) + "..." : content;
-        channelRepository.updateLastMessage(
-                channelId,
-                lastMessageId,
-                truncatedContent,
-                createdAt
-        );
-        channelMemberRepository.updateLastMessageId(channelId, lastMessageId);
     }
 
     @Async

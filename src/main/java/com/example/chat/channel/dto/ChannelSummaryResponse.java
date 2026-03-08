@@ -1,6 +1,7 @@
 package com.example.chat.channel.dto;
 
 import com.example.chat.channel.domain.Channel;
+import com.example.chat.message.domain.Message;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 
@@ -37,26 +38,26 @@ public class ChannelSummaryResponse {
         this.unreadCount = unreadCount;
     }
 
-    public static ChannelSummaryResponse from(Channel channel, int unreadCount) {
+    public static ChannelSummaryResponse from(Channel channel, Message lastMessage, int unreadCount) {
         return new ChannelSummaryResponse(
                 channel.getId(),
                 channel.getChannelName(),
                 channel.getMemberCount(),
-                channel.getLastMessageId(),
-                channel.getLastMessageContent(),
-                channel.getLastMessageAt(),
+                lastMessage.getId(),
+                lastMessage.getContent(),
+                lastMessage.getCreatedAt(),
                 unreadCount
         );
     }
 
-    public static ChannelSummaryResponse from(ChannelSummaryProjection proj, int unreadCount) {
+    public static ChannelSummaryResponse from(ChannelSummaryProjection proj, Message lastMessage, int unreadCount) {
         return new ChannelSummaryResponse(
-                proj.getChannelId(),
+                proj.getId(),
                 proj.getChannelName(),
                 proj.getMemberCount(),
-                proj.getLastMessageId(),
-                proj.getLastMessageContent(),
-                proj.getLastMessageAt(),
+                lastMessage.getId(),
+                lastMessage.getContent(),
+                lastMessage.getCreatedAt(),
                 unreadCount
         );
     }

@@ -48,8 +48,6 @@ public class MessageService {
         Message message = Message.create(channelId, authorId, sendMessageDto.getContent());
         message = messageRepository.save(message);
 
-        channelService.updateChannelPreview(channelId, message.getId(), sendMessageDto.getContent(), message.getCreatedAt());
-
         UserInfoProjection userInfoProjection = userRepository.findUserInfoById(authorId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 

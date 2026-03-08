@@ -39,13 +39,6 @@ public class Channel extends BaseTimeEntity {
     @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ChannelMember> members;
 
-    private Long lastMessageId;
-
-    @Column(length = 100)
-    private String lastMessageContent;
-
-    private Instant lastMessageAt;
-
     private Instant deletedAt;
 
     public Channel() {
