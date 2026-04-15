@@ -2,7 +2,6 @@ package com.example.chat.user.controller;
 
 import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.security.user.CustomUserDetails;
-import com.example.chat.user.dto.UserInfoProjection;
 import com.example.chat.user.dto.UserInfoResponse;
 import com.example.chat.user.service.UserService;
 import jakarta.validation.constraints.Min;
@@ -32,8 +31,8 @@ public class UserApiController {
     }
 
     @GetMapping("/users/@me")
-    public ResponseEntity<UserInfoProjection> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        UserInfoProjection userInfo = userService.getUserInfo(userDetails.getId());
+    public ResponseEntity<UserInfoResponse> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserInfoResponse userInfo = userService.getUserInfo(userDetails.getId());
         return ResponseEntity.ok(userInfo);
     }
 

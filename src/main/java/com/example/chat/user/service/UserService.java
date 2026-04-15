@@ -54,9 +54,10 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserInfoProjection getUserInfo(Long userId) {
-        return userRepository.findUserInfoById(userId)
+    public UserInfoResponse getUserInfo(Long userId) {
+        UserInfoProjection userInfoProjection = userRepository.findUserInfoById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+        return userMapper.toResponse(userInfoProjection);
     }
 
     @Transactional(readOnly = true)
@@ -72,7 +73,7 @@ public class UserService {
         Slice<UserInfoProjection> slice = userRepository.findFriendsByUserIdWithCursor(userId, longCursor, pageable);
 
         List<UserInfoResponse> friends = slice.getContent().stream()
-                .map(UserInfoResponse::new)
+                .map(userMapper::toResponse)
                 .toList();
         boolean hasNext = slice.hasNext();
         String nextCursor = null;
