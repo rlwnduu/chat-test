@@ -1,6 +1,6 @@
 package com.example.chat.channel.repository;
 
-import com.example.chat.channel.dto.ChannelMemberResponse;
+import com.example.chat.channel.dto.ChannelMemberProjection;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -22,9 +22,14 @@ public class ChannelMemberRepositoryImpl implements ChannelMemberRepositoryCusto
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Slice<ChannelMemberResponse> findMembersByCursor(Long channelId, String lastNickname, Long lastId, Pageable pageable) {
-        List<ChannelMemberResponse> content = queryFactory
-                .select(Projections.constructor(ChannelMemberResponse.class,
+    public Slice<ChannelMemberProjection> findMembersByCursor(
+            Long channelId,
+            String lastNickname,
+            Long lastId,
+            Pageable pageable
+    ) {
+        List<ChannelMemberProjection> content = queryFactory
+                .select(Projections.constructor(ChannelMemberProjection.class,
                         user.id,
                         user.username,
                         user.nickname,

@@ -1,6 +1,5 @@
 package com.example.chat.channel.domain;
 
-import com.example.chat.channel.dto.ChannelCreateRequest;
 import com.example.chat.global.domain.BaseTimeEntity;
 import com.example.chat.global.util.id.SnowflakeId;
 import jakarta.persistence.CascadeType;
@@ -11,6 +10,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -45,10 +45,10 @@ public class Channel extends BaseTimeEntity {
         this.members = new HashSet<>();
     }
 
-    public static Channel from(ChannelCreateRequest channelCreateRequest) {
-        Channel channel = new Channel();
-        channel.channelName = channelCreateRequest.getChannelName();
-        return channel;
+    @Builder
+    public Channel(String channelName) {
+        this.channelName = channelName;
+        this.memberCount = 0;
     }
 
     public void incrementMemberCount() {

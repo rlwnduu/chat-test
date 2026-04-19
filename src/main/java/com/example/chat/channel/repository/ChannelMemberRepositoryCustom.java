@@ -1,12 +1,12 @@
 package com.example.chat.channel.repository;
 
-import com.example.chat.channel.dto.ChannelMemberResponse;
+import com.example.chat.channel.dto.ChannelMemberProjection;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 public interface ChannelMemberRepositoryCustom {
 
-    Slice<ChannelMemberResponse> findMembersByCursor(
+    Slice<ChannelMemberProjection> findMembersByCursor(
             Long channelId,
             String lastNickname,
             Long lastId,

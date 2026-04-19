@@ -3,9 +3,11 @@ package com.example.chat.channel.service;
 import com.example.chat.channel.domain.Channel;
 import com.example.chat.channel.domain.ChannelMember;
 import com.example.chat.channel.dto.ChannelCreateRequest;
+import com.example.chat.channel.dto.ChannelMemberProjection;
 import com.example.chat.channel.dto.ChannelMemberResponse;
 import com.example.chat.channel.dto.ChannelSummaryProjection;
 import com.example.chat.channel.dto.ChannelSummaryResponse;
+import com.example.chat.channel.mapper.ChannelMapper;
 import com.example.chat.channel.repository.ChannelMemberRepository;
 import com.example.chat.channel.repository.ChannelRepository;
 import com.example.chat.channel.util.ChannelMemberCursorMapper;
@@ -35,20 +37,24 @@ public class ChannelService {
     private final ChannelMemberRepository channelMemberRepository;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
+    private final ChannelMapper channelMapper;
+
 
     @Transactional
     public ChannelSummaryResponse create(Long userId, ChannelCreateRequest channelCreateRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
-        Channel channel = channelRepository.save(Channel.from(channelCreateRequest));
+        Channel channel = channelMapper.toEntity(channelCreateRequest);
+        channel = channelRepository.save(channel);
 
         ChannelMember channelMember = new ChannelMember(channel, user);
         channelMemberRepository.save(channelMember);
         channel.incrementMemberCount();
 
         Message message = Message.create(channel.getId(), null, null);
-        return ChannelSummaryResponse.from(channel, message, 0);
+
+        return channelMapper.toSummaryResponse(channel, message, 0);
     }
 
     @Transactional(readOnly = true)
@@ -108,25 +114,29 @@ public class ChannelService {
         return null;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PageResponse<ChannelMemberResponse> getChannelMembers(Long channelId, String cursor, int limit) {
         ChannelMemberCursorMapper.CursorData cursorData = ChannelMemberCursorMapper.fromCursor(cursor);
 
-        Slice<ChannelMemberResponse> memberSlice = channelMemberRepository.findMembersByCursor(
+        Slice<ChannelMemberProjection> memberSlice = channelMemberRepository.findMembersByCursor(
                 channelId,
                 cursorData.nickname(),
                 cursorData.id(),
                 PageRequest.of(0, limit)
         );
 
+        List<ChannelMemberResponse> content = memberSlice.getContent().stream()
+                .map(channelMapper::toMemberResponse)
+                .toList();
+
         String nextCursor = null;
-        if (memberSlice.hasNext()) {
-            ChannelMemberResponse lastMember = memberSlice.getContent().get(memberSlice.getContent().size() - 1);
+        if (memberSlice.hasNext() && !content.isEmpty()) {
+            ChannelMemberResponse lastMember = content.get(content.size() - 1);
             nextCursor = ChannelMemberCursorMapper.toCursor(lastMember.getNickname(), lastMember.getUserId());
         }
 
         return new PageResponse<>(
-                memberSlice.getContent(),
+                content,
                 nextCursor,
                 memberSlice.hasNext()
         );
