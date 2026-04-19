@@ -10,8 +10,10 @@ import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -24,6 +26,7 @@ import java.util.Set;
 @Table(indexes = @Index(name = "idx_last_message_id", columnList = "lastMessageId DESC"))
 @SQLDelete(sql = "UPDATE channel SET deleted_at = NOW() WHERE channel_id = ?")
 @SQLRestriction("deleted_at IS NULL")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Channel extends BaseTimeEntity {
 
     @Id
@@ -37,13 +40,9 @@ public class Channel extends BaseTimeEntity {
     private int memberCount;
 
     @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ChannelMember> members;
+    private Set<ChannelMember> members = new HashSet<>();
 
     private Instant deletedAt;
-
-    public Channel() {
-        this.members = new HashSet<>();
-    }
 
     @Builder
     public Channel(String channelName) {
