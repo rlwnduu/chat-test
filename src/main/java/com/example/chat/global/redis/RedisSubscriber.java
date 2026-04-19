@@ -23,7 +23,7 @@ public class RedisSubscriber implements MessageListener {
             String publishMessage = new String(message.getBody());
             MessageEventPayload payload = objectMapper.readValue(publishMessage, MessageEventPayload.class);
 
-            Long channelId = payload.getChannelId();
+            String channelId = payload.getMessage().getChannelId();
             log.debug("Redis Pub/Sub Received. channelId: {}", channelId);
 
             messagingTemplate.convertAndSend("/topic/channel." + channelId, payload);

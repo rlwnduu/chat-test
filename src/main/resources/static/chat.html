@@ -1005,12 +1005,12 @@
 
                 if(data.type === "MESSAGE" && incomingAuthorId.toString() !== currentUserId) {
                     if(data.author) userProfileCache.set(incomingAuthorId.toString(), data.author);
-                    if(getYYYYMMDD(data.createdAt) !== lastRenderedDate) { renderDateSeparator(data.createdAt); lastRenderedDate = getYYYYMMDD(data.createdAt); }
+                    if(getYYYYMMDD(data.message.createdAt) !== lastRenderedDate) { renderDateSeparator(data.message.createdAt); lastRenderedDate = getYYYYMMDD(data.message.createdAt); }
                     renderMessage(data, false);
                     messageListContainer.scrollTop = messageListContainer.scrollHeight;
 
                     // [추가] 상대방 메시지 수신 시 읽음 처리 예약 (디바운싱)
-                    scheduleMarkAsRead(cid, data.id || data.messageId);
+                    scheduleMarkAsRead(cid, data.message.id || data.message.messageId);
                 }
             });
         }

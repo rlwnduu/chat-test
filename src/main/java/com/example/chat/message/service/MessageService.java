@@ -8,11 +8,14 @@ import com.example.chat.message.domain.Message;
 import com.example.chat.message.dto.MessageCreateRequest;
 import com.example.chat.message.dto.MessageEventPayload;
 import com.example.chat.message.dto.MessageLoadResponse;
+import com.example.chat.message.dto.MessageResponse;
 import com.example.chat.message.dto.MessageView;
+import com.example.chat.message.mapper.MessageMapper;
 import com.example.chat.message.repository.MessageRepository;
 import com.example.chat.user.domain.User;
 import com.example.chat.user.dto.UserInfoProjection;
 import com.example.chat.user.dto.UserInfoResponse;
+import com.example.chat.user.mapper.UserMapper;
 import com.example.chat.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +40,8 @@ public class MessageService {
     private final ChannelService channelService;
     private final ChannelMemberRepository channelMemberRepository;
     private final UserRepository userRepository;
+    private final MessageMapper messageMapper;
+    private final UserMapper userMapper;
 
     @Transactional
     public MessageEventPayload createAndSaveMessage(Long channelId, Long authorId, MessageCreateRequest sendMessageDto) {
@@ -51,7 +56,9 @@ public class MessageService {
         UserInfoProjection userInfoProjection = userRepository.findUserInfoById(authorId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
-        return new MessageEventPayload(message, userInfoProjection);
+        MessageResponse messageResponse = messageMapper.toResponse(message);
+        UserInfoResponse userInfoResponse = userMapper.toResponse(userInfoProjection);
+        return messageMapper.toEventPayload(messageResponse, userInfoResponse);
     }
 
     @Transactional
@@ -66,12 +73,13 @@ public class MessageService {
                 pageable
         );
 
-        List<MessageView> messages = messageSlice.getContent();
+        List<MessageView> messageViews = messageSlice.getContent();
+        List<MessageResponse> messages = messageMapper.toResponseList(messageViews);
         boolean hasNext = messageSlice.hasNext();
         String nextCursor = (hasNext && !messages.isEmpty()) ? messages.get(messages.size() - 1).getMessageId() : null;
 
         Set<String> authorIds = messages.stream()
-                .map(MessageView::getAuthorId)
+                .map(MessageResponse::getAuthorId)
                 .collect(Collectors.toSet());
         List<User> users = userRepository.findByIdIn(authorIds);
         Map<String, UserInfoResponse> userMap = users.stream()
