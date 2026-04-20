@@ -53,7 +53,7 @@ public class MessageService {
         Message message = Message.create(channelId, authorId, sendMessageDto.getContent());
         message = messageRepository.save(message);
 
-        UserInfoProjection userInfoProjection = userRepository.findUserInfoById(authorId)
+        UserInfoProjection userInfoProjection = userRepository.findUserInfoByIdCustom(authorId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
         MessageResponse messageResponse = messageMapper.toResponse(message);

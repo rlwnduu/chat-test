@@ -55,7 +55,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserInfoResponse getUserInfo(Long userId) {
-        UserInfoProjection userInfoProjection = userRepository.findUserInfoById(userId)
+        UserInfoProjection userInfoProjection = userRepository.findUserInfoByIdCustom(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
         return userMapper.toResponse(userInfoProjection);
     }
@@ -70,7 +70,7 @@ public class UserService {
         }
 
         PageRequest pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
-        Slice<UserInfoProjection> slice = userRepository.findFriendsByUserIdWithCursor(userId, longCursor, pageable);
+        Slice<UserInfoProjection> slice = userRepository.findFriendsByUserIdWithCursorCustom(userId, longCursor, pageable);
 
         List<UserInfoResponse> friends = slice.getContent().stream()
                 .map(userMapper::toResponse)

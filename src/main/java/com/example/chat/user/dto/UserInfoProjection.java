@@ -1,14 +1,14 @@
 package com.example.chat.user.dto;
 
-public interface UserInfoProjection {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    String getId();
-
-    String getUsername();
-
-    String getNickname();
-
-    String getProfileImageUrl();
-
-    String getProfileIconColor();
+@Getter
+@AllArgsConstructor
+public class UserInfoProjection {
+    private String id;
+    private String username;
+    private String nickname;
+    private String profileImageUrl;
+    private String profileIconColor;
 }
