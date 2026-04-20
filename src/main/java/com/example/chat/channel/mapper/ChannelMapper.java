@@ -2,6 +2,8 @@ package com.example.chat.channel.mapper;
 
 import com.example.chat.channel.domain.Channel;
 import com.example.chat.channel.dto.ChannelCreateRequest;
+import com.example.chat.channel.dto.ChannelInfoProjection;
+import com.example.chat.channel.dto.ChannelInfoResponse;
 import com.example.chat.channel.dto.ChannelMemberProjection;
 import com.example.chat.channel.dto.ChannelMemberResponse;
 import com.example.chat.channel.dto.ChannelSummaryProjection;
@@ -15,6 +17,8 @@ import org.mapstruct.ReportingPolicy;
 public interface ChannelMapper {
 
     Channel toEntity(ChannelCreateRequest request);
+
+    ChannelInfoResponse toChannelInfoResponse(ChannelInfoProjection projection);
 
     @Mapping(target = "channelId", source = "proj.id")
     @Mapping(target = "lastMessageId", source = "lastMessage.id")

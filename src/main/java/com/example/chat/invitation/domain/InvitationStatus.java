@@ -1,6 +1,6 @@
 package com.example.chat.invitation.domain;
 
-public enum RequestStatus {
+public enum InvitationStatus {
     PENDING,
     ACCEPTED,
     DECLINED

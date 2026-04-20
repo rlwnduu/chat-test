@@ -1071,7 +1071,7 @@
                 li.className = "p-4 hover:bg-gray-700 cursor-pointer border-b border-gray-700 transition";
 
                 // 제목 설정 (채널 초대면 채널명, 친구 신청이면 "친구 요청")
-                const title = (type === "CHANNEL_INVITE") ? item.channelName : "친구 요청";
+                const title = (type === "CHANNEL_INVITE") ? item.channel.channelName : "친구 요청";
 
                 li.innerHTML = `
                     <div class="flex items-center gap-3">

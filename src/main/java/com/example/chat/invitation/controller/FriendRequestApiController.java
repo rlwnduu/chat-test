@@ -4,12 +4,18 @@ import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.security.user.CustomUserDetails;
 import com.example.chat.invitation.dto.CreateFriendRequest;
 import com.example.chat.invitation.dto.FriendRequestResponse;
+import com.example.chat.invitation.dto.InviteSearchCondition;
 import com.example.chat.invitation.service.FriendRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @Slf4j
@@ -22,12 +28,11 @@ public class FriendRequestApiController {
 
     @GetMapping("/users/@me/friend-requests")
     public ResponseEntity<PageResponse<FriendRequestResponse>> getMyChannelInvitations(
-            @RequestParam(required = false) String cursor,
-            @RequestParam(defaultValue = "20") int size,
+            InviteSearchCondition condition,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long inviteeId = userDetails.getId();
-        PageResponse<FriendRequestResponse> response = friendRequestService.getFriendRequests(inviteeId, cursor, size);
+        condition.setUserId(userDetails.getId());
+        PageResponse<FriendRequestResponse> response = friendRequestService.getFriendRequests(condition);
         return ResponseEntity.ok(response);
     }
 

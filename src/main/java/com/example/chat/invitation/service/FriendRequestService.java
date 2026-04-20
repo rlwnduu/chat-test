@@ -4,18 +4,18 @@ import com.example.chat.global.dto.PageResponse;
 import com.example.chat.global.error.BusinessException;
 import com.example.chat.global.error.ErrorCode;
 import com.example.chat.invitation.domain.FriendRequest;
-import com.example.chat.invitation.domain.RequestStatus;
+import com.example.chat.invitation.domain.InvitationStatus;
 import com.example.chat.invitation.dto.CreateFriendRequest;
+import com.example.chat.invitation.dto.FriendRequestProjection;
 import com.example.chat.invitation.dto.FriendRequestResponse;
+import com.example.chat.invitation.dto.InviteSearchCondition;
+import com.example.chat.invitation.mapper.InvitationMapper;
 import com.example.chat.invitation.repository.FriendRequestRepository;
 import com.example.chat.user.domain.User;
 import com.example.chat.user.domain.UserFriend;
 import com.example.chat.user.repository.UserFriendRepository;
 import com.example.chat.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,28 +28,29 @@ public class FriendRequestService {
     private final FriendRequestRepository friendRequestRepository;
     private final UserRepository userRepository;
     private final UserFriendRepository userFriendRepository;
+    private final InvitationMapper invitationMapper;
 
     @Transactional(readOnly = true)
-    public PageResponse<FriendRequestResponse> getFriendRequests(Long inviteeId, String cursor, int size) {
-        Long cursorId = (cursor == null) ? null : Long.parseLong(cursor);
-        Pageable pageable = PageRequest.of(0, size);
+    public PageResponse<FriendRequestResponse> getFriendRequests(InviteSearchCondition condition) {
+        condition.setStatus(InvitationStatus.PENDING);
+        List<FriendRequestProjection> content = friendRequestRepository.search(condition);
 
-        Slice<FriendRequestResponse> slice = friendRequestRepository.findRequestsByInviteeIdAndStatusWithCursor(
-                inviteeId,
-                RequestStatus.PENDING,
-                cursorId,
-                pageable
-        );
+        boolean hasNext = content.size() > condition.getSize();
+        if (hasNext) {
+            content.remove(condition.getSize());
+        }
 
-        List<FriendRequestResponse> friendRequests = slice.getContent();
-        boolean hasNext = slice.hasNext();
-        String nextCursor = hasNext ? friendRequests.get(friendRequests.size() - 1).getId().toString() : null;
+        String nextCursor = null;
+        if (hasNext && !content.isEmpty()) {
+            nextCursor = content.get(content.size() - 1).getId().toString();
+        }
 
+        List<FriendRequestResponse> friendRequests = invitationMapper.toFriendRequestResponseList(content);
         return new PageResponse<>(friendRequests, nextCursor, hasNext);
     }
 
     @Transactional
-    public void request(Long inviterId, CreateFriendRequest request) {
+    public FriendRequestResponse request(Long inviterId, CreateFriendRequest request) {
         String targetUsername = request.getUsername();
 
         User inviter = userRepository.findById(inviterId)
@@ -66,13 +67,15 @@ public class FriendRequestService {
             throw new BusinessException(ErrorCode.ALREADY_FRIEND);
         }
 
-        if (friendRequestRepository.existsByInviterAndInviteeAndStatus(inviter, invitee, RequestStatus.PENDING)) {
+        if (friendRequestRepository.existsByInviterAndInviteeAndStatus(inviter, invitee, InvitationStatus.PENDING)) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 
         FriendRequest friendRequestEntity = new FriendRequest(inviter, invitee);
         friendRequestRepository.save(friendRequestEntity);
         invitee.incrementFriendRequestCount();
+
+        return invitationMapper.toResponse(friendRequestEntity);
     }
 
     @Transactional
@@ -80,7 +83,7 @@ public class FriendRequestService {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
 
-        if (friendRequest.getStatus() != RequestStatus.PENDING) {
+        if (friendRequest.getStatus() != InvitationStatus.PENDING) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 
@@ -106,7 +109,7 @@ public class FriendRequestService {
         FriendRequest friendRequest = friendRequestRepository.findById(requestId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.FRIEND_REQUEST_NOT_FOUND));
 
-        if (friendRequest.getStatus() != RequestStatus.PENDING) {
+        if (friendRequest.getStatus() != InvitationStatus.PENDING) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
 

@@ -1,8 +1,7 @@
 package com.example.chat.invitation.repository;
 
-import com.example.chat.channel.dto.ChannelInfoProjection;
 import com.example.chat.invitation.domain.InvitationStatus;
-import com.example.chat.invitation.dto.ChannelInviteProjection;
+import com.example.chat.invitation.dto.FriendRequestProjection;
 import com.example.chat.invitation.dto.InviteSearchCondition;
 import com.example.chat.user.domain.QUser;
 import com.example.chat.user.dto.UserInfoProjection;
@@ -14,42 +13,35 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-import static com.example.chat.channel.domain.QChannel.channel;
-import static com.example.chat.invitation.domain.QChannelInvite.channelInvite;
+import static com.example.chat.invitation.domain.QFriendRequest.friendRequest;
 
 @RequiredArgsConstructor
-public class ChannelInviteRepositoryImpl implements ChannelInviteRepositoryCustom {
+public class FriendRequestRepositoryImpl implements FriendRequestRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<ChannelInviteProjection> search(InviteSearchCondition condition) {
+    public List<FriendRequestProjection> search(InviteSearchCondition condition) {
         QUser inviter = new QUser("inviter");
         QUser invitee = new QUser("invitee");
 
         return queryFactory
-                .select(Projections.constructor(ChannelInviteProjection.class,
-                        channelInvite.id,
-                        Projections.constructor(ChannelInfoProjection.class,
-                                channel.id,
-                                channel.channelName,
-                                channel.memberCount
-                        ),
+                .select(Projections.constructor(FriendRequestProjection.class,
+                        friendRequest.id,
                         userInfoProjection(inviter),
                         userInfoProjection(invitee),
-                        channelInvite.status,
-                        channelInvite.createdAt
+                        friendRequest.status,
+                        friendRequest.createdAt
                 ))
-                .from(channelInvite)
-                .join(channelInvite.channel, channel)
-                .join(channelInvite.inviter, inviter)
-                .join(channelInvite.invitee, invitee)
+                .from(friendRequest)
+                .join(friendRequest.inviter, inviter)
+                .join(friendRequest.invitee, invitee)
                 .where(
-                        channelInvite.invitee.id.eq(condition.getUserId()),
+                        friendRequest.invitee.id.eq(condition.getUserId()),
                         eqStatus(condition.getStatus()),
                         ltCursorId(condition.getCursorId())
                 )
-                .orderBy(channelInvite.id.desc())
+                .orderBy(friendRequest.id.desc())
                 .limit(condition.getSize() + 1)
                 .fetch();
     }
@@ -65,10 +57,10 @@ public class ChannelInviteRepositoryImpl implements ChannelInviteRepositoryCusto
     }
 
     private BooleanExpression eqStatus(InvitationStatus status) {
-        return status != null ? channelInvite.status.eq(status) : null;
+        return status != null ? friendRequest.status.eq(status) : null;
     }
 
     private BooleanExpression ltCursorId(Long cursorId) {
-        return cursorId == null ? null : channelInvite.id.lt(cursorId);
+        return cursorId == null ? null : friendRequest.id.lt(cursorId);
     }
 }

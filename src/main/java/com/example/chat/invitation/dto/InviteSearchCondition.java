@@ -1,6 +1,6 @@
 package com.example.chat.invitation.dto;
 
-import com.example.chat.invitation.domain.RequestStatus;
+import com.example.chat.invitation.domain.InvitationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +16,7 @@ public class InviteSearchCondition {
 
     private Long userId;
 
-    private RequestStatus status;
+    private InvitationStatus status;
 
     private Long cursorId;
 
